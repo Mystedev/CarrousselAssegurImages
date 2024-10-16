@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field
+// ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -164,7 +164,7 @@ class _MenuDataState extends State<MenuData>
         else if (isMain) {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => MainWidget(username: 'admin')),
+                builder: (context) => MainWidget(username: 'admin')),
           );
         } else {
           closeDrawer(); // Cierra el Drawer después de seleccionar
@@ -212,42 +212,13 @@ class _MainWidgetState extends State<MainWidget> {
           // Seccion del carrusel, esta comentado para poder continuar trabajando en entornos de
           // pruebas , de esta forma no se ve afectado el funcionamiento sobreposicionado del menu
           // lateral, DISCOMMENT TO USE THIS PART
-          SizedBox(
-            width: double.infinity,
-            height: double.infinity, // Ocupar toda la pantalla
-            child: ImageCarousel(),
-          ),
-          Positioned(
-            bottom: 5,
-            right: 5,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Colors.transparent),
-                ),
-              ),
-              onPressed: () {
-                widget._menuKey.currentState?.openDrawer();
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.menu, color: Color.fromARGB(0, 0, 0, 0)),
-                  SizedBox(width: 4),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
+// El carrusel ya implementado por ti
 class ImageCarousel extends StatefulWidget {
   const ImageCarousel({super.key});
 
@@ -268,7 +239,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
       itemCount: imageIds.length,
       itemBuilder: (context, index, realIndex) {
         final imageUrl = '$baseUrl${imageIds[index]}-tauleta.jpg';
-        // print('Cargando imagen: $imageUrl'); // Para verificar la URL
         return SizedBox(
           width: MediaQuery.of(context).size.width,
           child: CachedNetworkImage(
@@ -370,8 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Si las credenciales son válidas, navegar a MainWidgetWithLoginSuccess
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => MainWidgetWithLoginSuccess(
-                          configuracio: configuracio),
+                      builder: (context) => MainWithLoginSuccess(),
                     ),
                   );
                 } else {
@@ -394,112 +363,127 @@ class _LoginScreenState extends State<LoginScreen> {
 
 // MainWidget con imagen de inicio de sesión exitosa
 // Pantalla principal con mensaje de éxito
-class MainWidgetWithLoginSuccess extends StatelessWidget {
-  final Configuracio configuracio;
+class MainWithLoginSuccess extends StatefulWidget {
+  @override
+  _MainWithLoginSuccessState createState() => _MainWithLoginSuccessState();
+}
 
-  const MainWidgetWithLoginSuccess({super.key, required this.configuracio});
+class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
+  // Controladores para los campos de texto
+  final TextEditingController tempsEntreConsultesController = TextEditingController();
+  final TextEditingController urlImatgesController = TextEditingController();
+
+  // Clave global para el formulario
+  final _formKey = GlobalKey<FormState>();
+
+  // Variable para guardar el tiempo entre animaciones y URL de imágenes
+  int? tempsEntreAnimacions;
+  String? urlImatges;
+
+  // Booleano para determinar si el formulario fue validado correctamente
+  bool isFormValidated = false;
+
+  // Función para validar y desar el formulario
+  void _onDesar() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        // Si el formulario es válido, guardamos los valores
+        tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
+        urlImatges = urlImatgesController.text;
+
+        // Marcamos que el formulario fue validado
+        isFormValidated = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "Tula09",
-                decoration: const InputDecoration(
-                  labelText: 'Id. Tablet:',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "https://platform.assegur.com/",
-                decoration: const InputDecoration(
-                  labelText: 'URL API:',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "api/tablets/{idTablet}/url",
-                decoration: const InputDecoration(
-                  labelText: 'EndPoint:',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "token",
-                decoration: const InputDecoration(
-                  labelText: 'Bearer:',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "5",
-                decoration: const InputDecoration(
-                  labelText: 'Temps entre consultes (en segons):',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              TextFormField(
-                initialValue: "https://assegur.com/img/tauletes/",
-                decoration: const InputDecoration(
-                  labelText: 'URL imatges:',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 25),
-              // Contenedor centrado para los botones que ocupan todo el ancho
-              Center(
-                child: Column(
-                  children: [
-                    // Botón 'DESAR' que ocupa todo el ancho
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        onPressed: () {
-                          // Implement the save functionality
-                        },
-                        child: const Text('DESAR'),
-                      ),
-                    ),
-                    const SizedBox(height: 15), // Espacio entre los botones
-                    // Botón 'ACTUALITZAR' que ocupa todo el ancho
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        onPressed: () {
-                          // Implement the update functionality
-                        },
-                        child: const Text('ACTUALITZAR'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: isFormValidated
+            ? ImageCarousel() // Si el formulario es válido, mostramos el carrusel
+            : _buildForm(),    // Si no, mostramos el formulario
       ),
     );
+  }
+
+  // Widget que construye el formulario
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          SizedBox(height: 16),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'ID Tablet'),
+            keyboardType: TextInputType.text,
+          ),
+          SizedBox(height: 16,),
+          TextFormField(
+            decoration: InputDecoration(labelText:'URl Api' ),
+            keyboardType: TextInputType.text,
+          ),
+          SizedBox(height: 16,),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Endpoint'),
+            keyboardType: TextInputType.text,
+          ),
+          SizedBox(height: 16),
+          TextFormField(
+            decoration: InputDecoration(labelText: 'Bearer'),
+            keyboardType: TextInputType.text,
+          ),
+          SizedBox(height: 16),
+          // Campo para el tiempo entre consultas
+          TextFormField(
+            controller: tempsEntreConsultesController,
+            decoration: InputDecoration(labelText: 'Temps entre animacions (ms)'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Aquest camp és obligatori';
+              }
+              if (int.tryParse(value) == null) {
+                return 'Introdueix un número vàlid';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: 16),
+
+          // Campo para la URL de imágenes
+          TextFormField(
+            controller: urlImatgesController,
+            decoration: InputDecoration(labelText: 'URL de les imatges'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Aquest camp és obligatori';
+              }
+              if (!Uri.tryParse(value)!.isAbsolute) {
+                return 'Introdueix una URL vàlida';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: 32),
+
+          // Botón para desar
+          ElevatedButton(
+            onPressed: _onDesar,
+            child: Text('Desar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    tempsEntreConsultesController.dispose();
+    urlImatgesController.dispose();
+    super.dispose();
   }
 }
 
