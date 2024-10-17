@@ -131,7 +131,7 @@ class _MenuDataState extends State<MenuData> with SingleTickerProviderStateMixin
                   },
                   child: Container(
                     width: 250, // Ancho del Drawer
-                    color: const Color.fromARGB(255, 157, 213, 238),
+                    color: const Color.fromARGB(129, 153, 189, 214),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,8 +228,19 @@ class _MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: Stack(// Stack controla capas a nivel de z-index en 'Css', cada widget que se añade debajo , en realidad esta por encima
         children: [
+          // Contenido principal de la pantalla
+          const Center(
+            // Texto de la pantalla principal para indicar que aun no se ha iniciado sesion
+            child: Text('Aun no has hecho Login',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 20, 70, 108),
+              ),
+            )
+          ),
           // Si se cumple la condicion, podemos proceder a mostrar el carrusel
           if (showCarousel) 
             ImageCarousel(), // Mostrar carrusel si los datos están validados
@@ -547,10 +558,20 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           ElevatedButton(
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-              )),
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.pressed)) {
+                    // Cambiar a gris oscuro cuando se presiona
+                    return Colors.grey[800]!;
+                  }
+                  // Color de fondo predeterminado
+                  return Colors.black;
+                },
+              ),
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
             onPressed: _onDesar,
@@ -559,10 +580,20 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           ElevatedButton(
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-              )),
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.pressed)) {
+                    // Cambiar a gris oscuro cuando se presiona
+                    return Colors.grey[800]!;
+                  }
+                  // Color de fondo predeterminado
+                  return Colors.black;
+                },
+              ),
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
             onPressed: () {
@@ -572,7 +603,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
               );
             },
             child: Text('Actualitzar'),
-          ),
+          )
         ],
       ),
     );
