@@ -12,7 +12,7 @@ void main() => runApp(MaterialApp(
         username: 'admin',// Obtenemos por parametro el user 
       ),
     ));
-
+// Se declara el comportamiento del widget
 class MenuData extends StatefulWidget {
   const MenuData({super.key});
   static _MenuDataState? of(BuildContext context) {
@@ -27,7 +27,7 @@ class _MenuDataState extends State<MenuData> with SingleTickerProviderStateMixin
   double _drawerOffset = -250; // Valor inicial oculto del Drawer
   late AnimationController _animationController;
   bool _isDragging = false; // Bandera para controlar el gesto
-
+  // Se inician los estados para la animación del drawer 
   @override
   void initState() {
     super.initState();
@@ -52,7 +52,7 @@ class _MenuDataState extends State<MenuData> with SingleTickerProviderStateMixin
       _animationController.reverse();
     });
   }
-
+  // Modificacion del contenido del drawer 'Menu data'
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -130,7 +130,7 @@ class _MenuDataState extends State<MenuData> with SingleTickerProviderStateMixin
                     _isDragging = false; // Reinicia la bandera
                   },
                   child: Container(
-                    width: 250, // Ancho del Drawer
+                    width: 300, // Ancho del Drawer
                     color: const Color.fromARGB(129, 153, 189, 214),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -151,7 +151,6 @@ class _MenuDataState extends State<MenuData> with SingleTickerProviderStateMixin
       ),
     );
   }
-
   // Método para construir botones del Drawer
   Widget _buildMenuButton(String title, IconData icon, {bool isAdmin = false, bool isMain = false, bool isDisconnect = false}) {
     return ElevatedButton(
@@ -397,7 +396,12 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, backgroundColor: Colors.black),
-              child: const Text('LOGIN'),
+              child: const Text('LOGIN',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
             ),
           ],
         ),
@@ -443,27 +447,27 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   // Booleano para determinar si el formulario fue validado correctamente
   bool isFormValidated = false;
   // Función para validar y desar el formulario
-  void _onDesar() {
-  if (_formKey.currentState!.validate()) {
-    setState(() {
-      // Si el formulario es válido, guardamos los valores
-      tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
-      urlImatges = urlImatgesController.text;
-      isFormValidated = true;
-      // Redirigir a MainWidget con los datos guardados
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainWidget(
-            username: 'admin',
-            tempsEntreAnimacions: tempsEntreAnimacions!,
-            urlImatges: urlImatges!,
+    void _onDesar() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        // Si el formulario es válido, guardamos los valores
+        tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
+        urlImatges = urlImatgesController.text;
+        isFormValidated = true;
+        // Redirigir a MainWidget con los datos guardados
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainWidget(
+              username: 'admin',
+              tempsEntreAnimacions: tempsEntreAnimacions!,
+              urlImatges: urlImatges!,
+            ),
           ),
-        ),
-      );
-    });
+        );
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +484,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
   // Widget que construye el formulario
   Widget _buildForm() {
-    return Form(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       key: _formKey,
       child: Column(
         children: [
