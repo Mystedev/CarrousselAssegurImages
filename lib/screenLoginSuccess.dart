@@ -31,8 +31,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   bool isLoading = false;
   String downloadProgress = "";
   bool _isDownloading = false;
-  final String urlUpdate =
-      'https://drive.google.com/uc?export=download&id=1ti8hGWg7immsGLEVbaZBXyPh7L5TDPkE';
+  final String urlUpdate = 'https://drive.google.com/uc?export=download&id=1ti8hGWg7immsGLEVbaZBXyPh7L5TDPkE';
 
   @override
   void initState() {

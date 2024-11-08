@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field, use_key_in_widget_constructors, prefer_final_fields, non_constant_identifier_names, sort_child_properties_last, use_build_context_synchronously, unnecessary_brace_in_string_interps
-import 'package:flutter/material.dart'; // Importar els materials necesaris que fa servir flutter
+import 'package:flutter/material.dart'; 
 import 'package:flutter_caroussel/configuracio.dart';
 import 'package:flutter_caroussel/imageCarousel.dart';
 import 'package:flutter_caroussel/url_model.dart';
 import 'package:flutter_caroussel/webViewContainer.dart';
 import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart'; // Esta clase importada guardara previamente las imagenes que cargaremos en el carrusel
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:carousel_slider/carousel_slider.dart'; 
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,11 +38,11 @@ void main() {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (context) => UrlModel(), // Inicializa el modelo de notificación
+      create: (context) => UrlModel(), 
       child: MaterialApp(
         home: MainWidget(
-          username: configuracio.user, // usa el parámetro user de Configuracio
-          id: configuracio.id, // usa el id de Configuracio
+          username: configuracio.user, 
+          id: configuracio.id, 
           tempsEntreAnimacions: int.tryParse(configuracio.temps),
           urlImatges: configuracio.urlImatges, urlApi: '',
           endpoint: configuracio.agentsSignatureEndPoint,
@@ -60,13 +60,9 @@ void main() {
                 id: configuracio.id,
                 tempsEntreAnimacions: int.tryParse(configuracio.temps),
                 urlImatges: configuracio.urlImatges,
-                urlApi: 'https://openweathermap.org/',
+                urlApi: 'https://platform.assegur.com',
                 endpoint: configuracio.agentsSignatureEndPoint,
                 bearer: configuracio.agentsSignaturebearer,
-              ),
-          '/WebViewContainer': (context) => WebViewContainer(
-                url:
-                    'https://openweathermap.org/', // API donde hacer exitosamente las peticiones
               ),
         },
       ),
@@ -74,17 +70,13 @@ void main() {
   );
 }
 
-/*  Clase MainWidget:
-    Esta clase se encarga de construir el widget principal de la aplicación.
-    Aqui se superpondra el carrusel de imagenes una vez se haya definido una
-    configuracion para el carrusel*/
 class MainWidget extends StatefulWidget {
   final String username;
   final int? tempsEntreAnimacions;
   final String? urlImatges;
   final String id;
-  final String bearer; // Bearer pasada
-  final String endpoint; // Endpoint pasado
+  final String bearer; 
+  final String endpoint; 
   final String urlApi;
 
   const MainWidget({
@@ -109,7 +101,6 @@ class _MainWidgetState extends State<MainWidget> {
   void initState() {
     super.initState();
 
-    // Check if tempsEntreAnimacions and urlImatges are available to display the carousel
     if (widget.tempsEntreAnimacions != null && widget.urlImatges != null) {
       setState(() {
         showCarousel = true;
@@ -225,7 +216,7 @@ class _MenuDataState extends State<MenuData>
       onWillPop: () async {
         if (_drawerOffset != -250) {
           closeDrawer(); // Cierra el drawer si está abierto
-          return false; // Evita salir de la App
+          return false;
         }
         return true; // Permite retroceder si el drawer está cerrado
       },
@@ -340,7 +331,7 @@ class _MenuDataState extends State<MenuData>
         });
         // Verificamos si es el botón de Admin
         if (isAdmin) {
-          // Navegar siempre a la pantalla de login
+          // Navegar a la pantalla de login
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const LoginScreen(
