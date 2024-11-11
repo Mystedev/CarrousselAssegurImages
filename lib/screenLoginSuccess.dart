@@ -31,7 +31,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   bool isLoading = false;
   String downloadProgress = "";
   bool _isDownloading = false;
-  final String urlUpdate = 'https://drive.google.com/uc?export=download&id=1ti8hGWg7immsGLEVbaZBXyPh7L5TDPkE';
+  final String urlUpdate =
+      'https://drive.google.com/uc?export=download&id=1IA74y4QkyXs_DJ9hVzj1YBvxbXJ4IPgi';
 
   @override
   void initState() {
@@ -56,222 +57,66 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
   String? _downloadLink;
 
-  Future<void> _fetchData() async {
-    // Reemplazar {idTablet} en el endpoint con el valor de _idTablet.text
-    final String apiUrl =
-        'https://platformpre.assegur.com/api/tablets/${_idTablet.text}/url';
-
-    try {
-      // Hacer la petición GET a la API con el header de autorización Bearer
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        // El encabezado de la peticion es necesario para recibir la autorization 'Bearer token'
-        headers: {
-          'Content-Type': 'aplication/json',
-          'Authorization': 'Bearer ${_bearer.text}',
-        },
-      );
-      // Si el estado de la respuesta es '200' , esta es correcta y se ha recibido correctamente
-      if (response.statusCode == 200) {
-        print('Petició exitosa amb id ${_idTablet.text}');
-
-        // Decodifica la respuesta JSON y extrae la URL
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        final String url = responseBody['url'];
-
-        // Mostrar la URL obtenida en el WebViewContainer paraa renderizar el contenido
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const WebViewContainer(
-              url: 'https://platformpre.assegur.com/api/tablets/_idTablet/url',
-            ),
-          ),
-        );
-      } else {
-        print('Error HTTP rebut: ${response.statusCode}');
-        print(response.body);
-
-        // Navegar a ErrorFound con el mensaje de excepción y el estado de la respuesta
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ErrorFound(
-                errorMessage: response.body,
-                errorException: response.statusCode),
-          ),
-        );
-      }
-    } catch (e) {
-      print('Excepció: $e');
-
-      // En caso de excepción, mostrar el mensaje de error en ErrorFound
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ErrorFound(
-            errorMessage: e.toString(),
-          ),
-        ),
-      );
-    }
-
-    // Retardo antes de intentar la petición de nuevo
-    await Future.delayed(const Duration(seconds: 5));
-  }
-
   // Funcion para guardar los datos introducidos en la configuracion del carrusel
   void _onDesar() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        isLoading = true;
-      });
+  if (_formKey.currentState!.validate()) {
+    setState(() {
+      isLoading = true;
+    });
 
-      await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
 
-      setState(() {
-        tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
-        urlImatges = urlImatgesController.text;
-        isFormValidated = true;
-        isLoading = false;
-      });
+    setState(() {
+      tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
+      urlImatges = urlImatgesController.text;
+      isFormValidated = true;
+      isLoading = false;
+    });
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('idTablet', _idTablet.text);
-      await prefs.setString('urlApi', _UrlApi.text);
-      await prefs.setString('endPoint', _endPoint.text);
-      await prefs.setString('bearer', _bearer.text);
-      await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
-      await prefs.setString('urlImatges', urlImatges!);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('idTablet', _idTablet.text); // Guardar idTablet
+    await prefs.setString('urlApi', _UrlApi.text);
+    await prefs.setString('endPoint', _endPoint.text);
+    await prefs.setString('bearer', _bearer.text); // Guardar bearer
+    await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
+    await prefs.setString('urlImatges', urlImatges!);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Dades desades correctament!',
-            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-          ),
-          backgroundColor: Color.fromARGB(255, 138, 231, 206),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Dades desades correctament!',
+          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
         ),
-      );
+        backgroundColor: Color.fromARGB(255, 138, 231, 206),
+      ),
+    );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainWidget(
-            username: 'admin',
-            id: _idTablet.text,
-            urlApi: _UrlApi.text,
-            tempsEntreAnimacions: tempsEntreAnimacions!,
-            urlImatges: urlImatges!,
-            bearer: _bearer.text,
-            endpoint: _endPoint.text,
-          ),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainWidget(
+          username: 'admin',
+          id: _idTablet.text,
+          urlApi: _UrlApi.text,
+          tempsEntreAnimacions: tempsEntreConsultesController.text.isNotEmpty
+              ? int.parse(tempsEntreConsultesController.text)
+              : 5,
+          urlImatges: urlImatges!,
+          bearer: _bearer.text,
+          endpoint: _endPoint.text,
         ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dades invalides'),
-        ),
-      );
-    }
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Dades invalides'),
+      ),
+    );
   }
+}
 
-  // Funcion para descargar e instalar el APK de GoogleDrive
-  /*Future<void> _downloadAndInstallApk() async {
-    final String apkUrl =
-        'https://drive.google.com/file/d/1ti8hGWg7immsGLEVbaZBXyPh7L5TDPkE/view'; // Ensure this is a direct download link
 
-    try {
-      // Permiso para guardar el apk en la ruta
-      final status = await Permission.storage.request();
-      if (!status.isGranted) {
-        print("Storage permission denied");
-        return;
-      }
-
-      setState(() {
-        _isDownloading = true;
-        downloadProgress = "0%";
-      });
-
-      // Usar el directorio predeterminado de descargas 'Download'
-      Directory? downloadsDirectory;
-      if (Platform.isAndroid) {
-        downloadsDirectory = await getExternalStorageDirectory();
-      }
-      // No se pudo obtener el directorio
-      if (downloadsDirectory == null) {
-        throw Exception("Failed to get the Downloads directory.");
-      }
-
-      final String filePath = '${downloadsDirectory.path}/update.apk';
-
-      // Metodo asincrono para obtener el APK y descargarlo
-      final response = await http.Client().send(
-        http.Request('GET', Uri.parse(apkUrl)),
-      );
-
-      if (response.statusCode == 200) {
-        final file = File(filePath);
-        final fileSink = file.openWrite();
-        print('Filesink : $fileSink');
-        int downloaded = 0;
-        final contentLength = response.contentLength ?? 0;
-
-        response.stream.listen(
-          (chunk) {
-            fileSink.add(chunk);
-            downloaded += chunk.length;
-            setState(() {
-              downloadProgress =
-                  "${((downloaded / contentLength) * 100).toStringAsFixed(0)}%";
-              print('Lentgh : $contentLength');
-            });
-          },
-          onDone: () async {
-            await fileSink.close();
-
-            // Verify the file size
-            if (await file.length() == 0) {
-              print("Error: The file is empty.");
-              setState(() {
-                _isDownloading = false;
-              });
-              return;
-            }
-
-            setState(() {
-              _isDownloading = false;
-            });
-
-            // Open the APK to initiate installation
-            final result = await OpenFile.open(filePath);
-            if (result.type == ResultType.error) {
-              print('Error opening file: ${result.message}');
-            }
-          },
-          onError: (e) {
-            setState(() {
-              _isDownloading = false;
-            });
-            print("Error downloading file: $e");
-          },
-          cancelOnError: true,
-        );
-      } else {
-        print("Error downloading: ${response.statusCode}");
-        setState(() {
-          _isDownloading = false;
-        });
-      }
-    } catch (e) {
-      print("Exception: $e");
-      setState(() {
-        _isDownloading = false;
-      });
-    }
-  }*/
 
   void _loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -445,19 +290,6 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                     child: const Text('Actualitzar'),
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Boton hacer peticion
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(
-                            Color.fromARGB(255, 113, 192, 229)),
-                        foregroundColor: WidgetStatePropertyAll(Colors.black)),
-                    onPressed: _fetchData,
-                    child: const Text('Fer petició'),
-                  ),
-                )
               ],
             ),
           ),

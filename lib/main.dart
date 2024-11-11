@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field, use_key_in_widget_constructors, prefer_final_fields, non_constant_identifier_names, sort_child_properties_last, use_build_context_synchronously, unnecessary_brace_in_string_interps
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:flutter_caroussel/configuracio.dart';
 import 'package:flutter_caroussel/imageCarousel.dart';
 import 'package:flutter_caroussel/url_model.dart';
 import 'package:flutter_caroussel/webViewContainer.dart';
 import 'package:http/http.dart' as http;
-import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:carousel_slider/carousel_slider.dart'; 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,23 +28,24 @@ void main() {
   const configuracio = Configuracio(
     user: 'admin',
     password: '1234',
-    temps: '5', 
+    temps: '5',
     urlImatges: 'https://www.assegur.com/img/tauletes/',
     isValid: true,
     agentsSignatureEndPoint: '/api/tablets/',
-    agentsSignaturebearer: 'af18a463fd6a3226d28c4f71722983bc', 
+    agentsSignaturebearer: 'af18a463fd6a3226d28c4f71722983bc',
     agentsSignatureIdTablet: 'Taula09',
     loggedInWithMicrosoftAccount: false,
   );
   runApp(
     ChangeNotifierProvider(
-      create: (context) => UrlModel(), 
+      create: (context) => UrlModel(),
       child: MaterialApp(
         home: MainWidget(
-          username: configuracio.user, 
-          id: configuracio.id, 
+          username: configuracio.user,
+          id: configuracio.id,
           tempsEntreAnimacions: int.tryParse(configuracio.temps),
-          urlImatges: configuracio.urlImatges, urlApi: '',
+          urlImatges: configuracio.urlImatges,
+          urlApi: '',
           endpoint: configuracio.agentsSignatureEndPoint,
           bearer: configuracio.agentsSignatureEndPoint,
         ),
@@ -75,8 +76,8 @@ class MainWidget extends StatefulWidget {
   final int? tempsEntreAnimacions;
   final String? urlImatges;
   final String id;
-  final String bearer; 
-  final String endpoint; 
+  final String bearer;
+  final String endpoint;
   final String urlApi;
 
   const MainWidget({
@@ -86,8 +87,8 @@ class MainWidget extends StatefulWidget {
     this.tempsEntreAnimacions,
     this.urlImatges,
     required this.bearer,
-    required this.endpoint, 
-    required this.urlApi,
+    required this.endpoint,
+    required this.urlApi, 
   });
 
   @override
@@ -95,17 +96,71 @@ class MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<MainWidget> {
-  bool showCarousel = false;
+  Timer? _timer;
+  String? currentUrl;
+  String? apiUrl;
+  String? bearerToken;
+  String? idTablet;
+  bool showWebView = false;
 
   @override
   void initState() {
     super.initState();
+    _loadConfig();
+    _startPolling();
+  }
 
-    if (widget.tempsEntreAnimacions != null && widget.urlImatges != null) {
-      setState(() {
-        showCarousel = true;
-      });
+  Future<void> _loadConfig() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      apiUrl = prefs.getString('urlApi') ?? widget.urlApi;
+      bearerToken = prefs.getString('bearer') ?? widget.bearer;
+      idTablet = prefs.getString('idTablet') ?? widget.id;
+    });
+  }
+
+  void _startPolling() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      await _fetchData();
+    });
+  }
+
+  Future<void> _fetchData() async {
+    if (apiUrl == null || bearerToken == null || idTablet == null) return;
+
+    final String fullUrl =
+        'https://platformpre.assegur.com/api/tablets/{idTablet.text}/url';
+    try {
+      final response = await http.get(
+        Uri.parse(fullUrl),
+        headers: {
+          'Content-Type': 'aplication/json',
+          'Authorization': 'Bearer $bearerToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        print('Petició exitosa amb id ${idTablet}');
+        final data = json.decode(response.body);
+        final url = data['url'];
+
+        if (url != null && url != currentUrl) {
+          setState(() {
+            currentUrl = url;
+            showWebView = true; // Mostrar WebView si la URL es válida
+          });
+        }
+      } else {
+        print('Error HTTP: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception in _fetchData: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -115,30 +170,12 @@ class _MainWidgetState extends State<MainWidget> {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'Benvingut',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                ),
-              ),
-            ),
-          ),
-          ImageCarousel(
-            animationInterval: widget.tempsEntreAnimacions ?? 5,
-          ),
+          if (!showWebView)
+            // El carrusel se muestra siempre hasta que `showWebView` sea verdadero
+            ImageCarousel(animationInterval: widget.tempsEntreAnimacions ?? 5),
+          if (showWebView && currentUrl != null)
+            WebViewContainer(
+                url: currentUrl!), // Muestra el WebView si la URL es válida
           MenuData(key: GlobalKey<_MenuDataState>()),
         ],
       ),
