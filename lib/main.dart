@@ -17,12 +17,12 @@ import 'screenLoginSuccess.dart';
 
 // ******************************************************************
 /*
-  Aplicación princiapl:
-  Esta se compone de un carrusel de imagenes solicitadas desde una API
-  y un widget para mostrar la información del clima , tambien obtenido de una API.
-  La seccion de inicio permanece vacia mientras no se defina una configuracion ni 
-  se haya hecho LOGIN del usuario del dispositivo.
-*/
+    Aplicación princiapl:
+    Esta se compone de un carrusel de imagenes solicitadas desde una API
+    y un widget para mostrar la información del clima , tambien obtenido de una API.
+    La seccion de inicio permanece vacia mientras no se defina una configuracion ni 
+    se haya hecho LOGIN del usuario del dispositivo.
+  */
 void main() {
   // Configuracion general del widget principal
   const configuracio = Configuracio(
@@ -88,26 +88,27 @@ class MainWidget extends StatefulWidget {
     this.urlImatges,
     required this.bearer,
     required this.endpoint,
-    required this.urlApi, 
+    required this.urlApi,
   });
 
   @override
-  _MainWidgetState createState() => _MainWidgetState();
+  MainWidgetState createState() => MainWidgetState();
 }
 
-class _MainWidgetState extends State<MainWidget> {
+class MainWidgetState extends State<MainWidget> {
   Timer? _timer;
   String? currentUrl;
   String? apiUrl;
   String? bearerToken;
   String? idTablet;
+  String? url;
   bool showWebView = false;
 
   @override
   void initState() {
     super.initState();
     _loadConfig();
-    _startPolling();
+    startPolling();
   }
 
   Future<void> _loadConfig() async {
@@ -119,8 +120,9 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  void _startPolling() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+  // Método para iniciar las peticiones automáticas
+  void startPolling() {
+    _timer ??= Timer.periodic(Duration(seconds: 1), (timer) async {
       await _fetchData();
     });
   }
@@ -128,11 +130,10 @@ class _MainWidgetState extends State<MainWidget> {
   Future<void> _fetchData() async {
     if (apiUrl == null || bearerToken == null || idTablet == null) return;
 
-    final String fullUrl =
-        'https://platformpre.assegur.com/api/tablets/{idTablet.text}/url';
+    final String? fullUrl = apiUrl;
     try {
       final response = await http.get(
-        Uri.parse(fullUrl),
+        Uri.parse(fullUrl!),
         headers: {
           'Content-Type': 'aplication/json',
           'Authorization': 'Bearer $bearerToken',
@@ -159,7 +160,6 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -184,11 +184,11 @@ class _MainWidgetState extends State<MainWidget> {
 }
 
 /*
-  Clase MenuData:
-  Esta clase se encarga de gestionar el menu de la aplicación.
-  Esta se refiere a una barra lateral oculta que solo se muestra cuando hacemos drag
-  y la movemos del borde
-*/
+    Clase MenuData:
+    Esta clase se encarga de gestionar el menu de la aplicación.
+    Esta se refiere a una barra lateral oculta que solo se muestra cuando hacemos drag
+    y la movemos del borde
+  */
 class MenuData extends StatefulWidget {
   const MenuData({super.key});
   static _MenuDataState? of(BuildContext context) {
@@ -200,10 +200,10 @@ class MenuData extends StatefulWidget {
 }
 
 /*
-  Clase _MenuDataState:
-  Esta clase se encarga de gestionar el comportamiento del menu.
-  Asi como la animacion ,tiempo,duracion,tamaño del menu
-*/
+    Clase _MenuDataState:
+    Esta clase se encarga de gestionar el comportamiento del menu.
+    Asi como la animacion ,tiempo,duracion,tamaño del menu
+  */
 class _MenuDataState extends State<MenuData>
     with SingleTickerProviderStateMixin {
   double _drawerOffset = -250; // Valor inicial del drawer
@@ -237,18 +237,22 @@ class _MenuDataState extends State<MenuData>
   }
 
   /*
-    Clase build:
-    Esta clase se encarga de construir el widget de la barra lateral oculta.
-    La seccion de inicio permanece vacia mientras no se defina una configuracion.
-    Aqui encontraremos botones para acceder a otros widgets asi como :
-    Seccion de inicio de sesion
-    Seccion de inicio de la App
-    Seccion de desconectar la sesión
-  */
+      Clase build:
+      Esta clase se encarga de construir el widget de la barra lateral oculta.
+      La seccion de inicio permanece vacia mientras no se defina una configuracion.
+      Aqui encontraremos botones para acceder a otros widgets asi como :
+      Seccion de inicio de sesion
+      Seccion de inicio de la App
+      Seccion de desconectar la sesión
+    */
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    double verticalLimit = screenHeight / 2; // Límite para abrir el drawer
+    double verticalLimit = screenHeight / 2; // Límite vertical
+    double horizontalLimit =
+        screenWidth / 2; // Solo entre mitad izquierda y borde izquierdo
+
     return WillPopScope(
       onWillPop: () async {
         if (_drawerOffset != -250) {
@@ -261,8 +265,9 @@ class _MenuDataState extends State<MenuData>
         children: [
           GestureDetector(
             onHorizontalDragStart: (details) {
-              if (details.localPosition.dy <= verticalLimit ||
-                  _drawerOffset != -250) {
+              // Verificar que el toque inicie en la mitad izquierda de la pantalla
+              if (details.localPosition.dx <= horizontalLimit &&
+                  details.localPosition.dy <= verticalLimit) {
                 _isDragging = true;
               }
             },
@@ -320,10 +325,8 @@ class _MenuDataState extends State<MenuData>
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(205, 255, 255, 255),
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(
-                            15), // Borde superior derecho redondeado
-                        bottomRight: Radius.circular(
-                            15), // Borde inferior derecho redondeado
+                        topRight: Radius.circular(15),
+                        bottomRight: Radius.circular(15),
                       ),
                     ),
                     child: Column(
@@ -351,10 +354,10 @@ class _MenuDataState extends State<MenuData>
   }
 
   /*
-    Clase _buildMenuButton:
-    Esta clase se encarga de construir los botones del Drawer , los cuales nos daran
-    Acceso al resto de widgets y estados de la aplicacion
-  */
+      Clase _buildMenuButton:
+      Esta clase se encarga de construir los botones del Drawer , los cuales nos daran
+      Acceso al resto de widgets y estados de la aplicacion
+    */
   // Método para construir los botones del Drawer
   Widget _buildMenuButton(String title, IconData icon,
       {bool isAdmin = false, bool isMain = false}) {
@@ -392,24 +395,24 @@ class _MenuDataState extends State<MenuData>
             ),
           );
         } /*else if (isDisconnect) {
-          // Obtener las preferencias para verificar si hay una sesión activa
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+            // Obtener las preferencias para verificar si hay una sesión activa
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-          if (isLoggedIn) {
-            // Mostrar la alerta de confirmación si hay sesión activa
-            print('Asking to logout the session');
-            _showLogoutConfirmationDialog(context);
-          } else {
-            // Informar al usuario si no hay ninguna sesión activa
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('No hi ha cap sessió activa'),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
-          }
-        }*/
+            if (isLoggedIn) {
+              // Mostrar la alerta de confirmación si hay sesión activa
+              print('Asking to logout the session');
+              _showLogoutConfirmationDialog(context);
+            } else {
+              // Informar al usuario si no hay ninguna sesión activa
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No hi ha cap sessió activa'),
+                  backgroundColor: Colors.redAccent,
+                ),
+              );
+            }
+          }*/
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: isSelected ? Colors.white : Colors.black,
@@ -433,45 +436,45 @@ class _MenuDataState extends State<MenuData>
   }
 
   /* void _showLogoutConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Desconnexió'),
-          content: const Text('¿Estás segur de que vols tancar la sessió?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                // Cerrar el cuadro de diálogo sin desconectar
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Tancar sessió'),
-              onPressed: () async {
-                // Proceder a cerrar la sesión
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                // Eliminar el estado de sesión
-                await prefs.remove('isLoggedIn');
-                // Redirigir al login
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (context) => MainWidget(
-                            username: 'admin',
-                            id: 'Taula09',
-                            urlApi: '',
-                          )),
-                  (Route<dynamic> route) =>
-                      false, // Eliminar todas las rutas anteriores
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Confirmar Desconnexió'),
+            content: const Text('¿Estás segur de que vols tancar la sessió?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  // Cerrar el cuadro de diálogo sin desconectar
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Tancar sessió'),
+                onPressed: () async {
+                  // Proceder a cerrar la sesión
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  // Eliminar el estado de sesión
+                  await prefs.remove('isLoggedIn');
+                  // Redirigir al login
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => MainWidget(
+                              username: 'admin',
+                              id: 'Taula09',
+                              urlApi: '',
+                            )),
+                    (Route<dynamic> route) =>
+                        false, // Eliminar todas las rutas anteriores
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
-}
-*/
+  */
 }

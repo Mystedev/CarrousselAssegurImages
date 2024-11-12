@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously, non_constant_identifier_names, avoid_print, unused_element, use_key_in_widget_constructors, library_private_types_in_public_api, camel_case_types, use_super_parameters, unused_import, prefer_final_fields, prefer_const_declarations, no_leading_underscores_for_local_identifiers, override_on_non_overriding_member, deprecated_member_use
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
@@ -13,10 +14,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:drive_direct_download/drive_direct_download.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MainWithLoginSuccess extends StatefulWidget {
+
+
   @override
   _MainWithLoginSuccessState createState() => _MainWithLoginSuccessState();
 }
@@ -28,7 +31,12 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   late TextEditingController _UrlApi;
   late TextEditingController _endPoint;
   late TextEditingController _bearer;
+  String url = '';
   bool isLoading = false;
+  final GlobalKey<MainWidgetState> _mainWidgetKey =
+      GlobalKey<MainWidgetState>();
+  bool isAutoFetching = false;
+  Timer? _timer; // Timer para manejar las peticiones automáticas
   String downloadProgress = "";
   bool _isDownloading = false;
   final String urlUpdate =
@@ -41,8 +49,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     urlImatgesController =
         TextEditingController(text: 'https://assegur.com/img/tauletes');
     _idTablet = TextEditingController(text: 'Taula09');
-    _UrlApi = TextEditingController(
-        text: 'https://signaturit.assegur.com/AgentsSignature/');
+    _UrlApi = TextEditingController(text: 'https://platformpre.assegur.com/');
     _endPoint = TextEditingController(text: 'api/tablets/{idTablet}/url');
     _bearer = TextEditingController(
         text:
@@ -59,71 +66,137 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
   // Funcion para guardar los datos introducidos en la configuracion del carrusel
   void _onDesar() async {
-  if (_formKey.currentState!.validate()) {
-    setState(() {
-      isLoading = true;
-    });
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
 
-    await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
-    setState(() {
-      tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
-      urlImatges = urlImatgesController.text;
-      isFormValidated = true;
-      isLoading = false;
-    });
+      setState(() {
+        tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
+        urlImatges = urlImatgesController.text;
+        isFormValidated = true;
+        isLoading = false;
+      });
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('idTablet', _idTablet.text); // Guardar idTablet
-    await prefs.setString('urlApi', _UrlApi.text);
-    await prefs.setString('endPoint', _endPoint.text);
-    await prefs.setString('bearer', _bearer.text); // Guardar bearer
-    await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
-    await prefs.setString('urlImatges', urlImatges!);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('idTablet', _idTablet.text); // Guardar idTablet
+      await prefs.setString('urlApi', _UrlApi.text);
+      await prefs.setString('endPoint', _endPoint.text);
+      await prefs.setString('bearer', _bearer.text); // Guardar bearer
+      await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
+      await prefs.setString('urlImatges', urlImatges!);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Dades desades correctament!',
-          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Dades desades correctament!',
+            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+          ),
+          backgroundColor: Color.fromARGB(255, 138, 231, 206),
         ),
-        backgroundColor: Color.fromARGB(255, 138, 231, 206),
-      ),
-    );
+      );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MainWidget(
-          username: 'admin',
-          id: _idTablet.text,
-          urlApi: _UrlApi.text,
-          tempsEntreAnimacions: tempsEntreConsultesController.text.isNotEmpty
-              ? int.parse(tempsEntreConsultesController.text)
-              : 5,
-          urlImatges: urlImatges!,
-          bearer: _bearer.text,
-          endpoint: _endPoint.text,
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainWidget(
+            username: 'admin',
+            id: _idTablet.text,
+            urlApi: _UrlApi.text,
+            tempsEntreAnimacions: tempsEntreConsultesController.text.isNotEmpty
+                ? int.parse(tempsEntreConsultesController.text)
+                : 5,
+            urlImatges: urlImatges!,
+            bearer: _bearer.text,
+            endpoint: _endPoint.text,
+          ),
         ),
-      ),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Dades invalides'),
-      ),
-    );
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dades invalides'),
+        ),
+      );
+    }
   }
-}
 
+  Future<void> _fetchData() async {
+    // Reemplazar {idTablet} en el endpoint con el valor de _idTablet.text
+    final String apiUrl = '${_UrlApi.text}${_endPoint.text}';
+    // https://platformpre.assegur.com/api/tablets/tablet-test-01/url
+    url = apiUrl;
+    try {
+      // Hacer la petición GET a la API con el header de autorización Bearer
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        // El encabezado de la peticion es necesario para recibir la autorization 'Bearer token'
+        headers: {
+          'Content-Type': 'aplication/json',
+          'Authorization': 'Bearer ${_bearer.text}',
+        },
+      );
+      // Si el estado de la respuesta es '200' , esta es correcta y se ha recibido correctamente
+      if (response.statusCode == 200) {
+        print('Petició exitosa amb id ${_idTablet.text}');
 
+        // Decodifica la respuesta JSON y extrae la URL
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final String url = responseBody['url'];
+
+        // Mostrar la URL obtenida en el WebViewContainer para renderizar el contenido
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewContainer(
+              url: apiUrl,
+            ),
+          ),
+        );
+      } else {
+        print(apiUrl);
+        print('Error HTTP rebut: ${response.statusCode}');
+        print(response.body);
+
+        // Navegar a ErrorFound con el mensaje de excepción y el estado de la respuesta
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ErrorFound(
+                errorMessage: response.body,
+                errorException: response.statusCode),
+          ),
+        );
+      }
+    } catch (e) {
+      print(apiUrl);
+      print('Excepció: $e');
+
+      // En caso de excepción, mostrar el mensaje de error en ErrorFound
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ErrorFound(
+            errorMessage: e.toString(),
+          ),
+        ),
+      );
+    }
+
+    // Retardo antes de intentar la petición de nuevo
+    await Future.delayed(const Duration(seconds: 5));
+  }
+
+  // Método para controlar el inicio o detención de las peticiones
 
   void _loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _idTablet.text = prefs.getString('idTablet') ?? 'Taula09';
       _UrlApi.text =
-          prefs.getString('urlApi') ?? 'https://platform.assegur.com/';
+          prefs.getString('urlApi') ?? url;
       _endPoint.text =
           prefs.getString('endPoint') ?? 'api/tablets/${_idTablet.text}/url';
       _bearer.text = prefs.getString('bearer') ??
@@ -290,6 +363,21 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                     child: const Text('Actualitzar'),
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Botón para hacer petició a la Api
+                SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        style: const ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                                Color.fromARGB(255, 137, 199, 241)),
+                            foregroundColor:
+                                WidgetStatePropertyAll(Colors.black)),
+                        onPressed: _fetchData,
+                        child: const Text('Fer petició'))),
+                const SizedBox(
+                  height: 16,
+                ),
               ],
             ),
           ),
@@ -318,8 +406,8 @@ class ErrorFound extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Text(
             '''Error en la petició -> $errorMessage  
-              Error -> $errorException
-            ''',
+                Error -> $errorException
+              ''',
             style: const TextStyle(fontSize: 16, color: Colors.red),
             textAlign: TextAlign.center,
           ),
