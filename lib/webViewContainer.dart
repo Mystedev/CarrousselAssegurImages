@@ -62,6 +62,9 @@ class _WebViewContainerState extends State<WebViewContainer> {
               ),
             ),
           ),
+          Container(
+            child: Text(widget.url),
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -98,6 +101,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                                 urlApi: '',
                                 endpoint: '',
                                 bearer: '',
+                                urlImatges: '',
                                 ),
                         ),
                       );

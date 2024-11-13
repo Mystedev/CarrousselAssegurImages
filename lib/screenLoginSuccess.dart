@@ -18,8 +18,6 @@ import 'package:drive_direct_download/drive_direct_download.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MainWithLoginSuccess extends StatefulWidget {
-
-
   @override
   _MainWithLoginSuccessState createState() => _MainWithLoginSuccessState();
 }
@@ -47,10 +45,11 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     super.initState();
     tempsEntreConsultesController = TextEditingController(text: '5');
     urlImatgesController =
-        TextEditingController(text: 'https://assegur.com/img/tauletes');
-    _idTablet = TextEditingController(text: 'Taula09');
-    _UrlApi = TextEditingController(text: 'https://platformpre.assegur.com/');
-    _endPoint = TextEditingController(text: 'api/tablets/{idTablet}/url');
+        TextEditingController(text: 'https://assegur.com/img/tauletes/');
+    _idTablet = TextEditingController(text: 'Taula20');
+    _UrlApi = TextEditingController(text: 'https://platform.assegur.com/');
+    var text = 'api/tablet/$_idTablet/url';
+    _endPoint = TextEditingController(text: text);
     _bearer = TextEditingController(
         text:
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI');
@@ -75,18 +74,21 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
       setState(() {
         tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
-        urlImatges = urlImatgesController.text;
+        urlImatges =
+            urlImatgesController.text; // Obtén el valor de urlImatges aquí
         isFormValidated = true;
         isLoading = false;
       });
 
+      // Guardar los datos en SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('idTablet', _idTablet.text); // Guardar idTablet
+
+      await prefs.setString('idTablet', _idTablet.text);
       await prefs.setString('urlApi', _UrlApi.text);
       await prefs.setString('endPoint', _endPoint.text);
-      await prefs.setString('bearer', _bearer.text); // Guardar bearer
+      await prefs.setString('bearer', _bearer.text);
       await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
-      await prefs.setString('urlImatges', urlImatges!);
+      await prefs.setString('urlImatges', urlImatges!); // Guardar urlImatges
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -98,6 +100,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         ),
       );
 
+      // Navegar a MainWidget, pasando la URL de las imágenes
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -108,7 +111,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
             tempsEntreAnimacions: tempsEntreConsultesController.text.isNotEmpty
                 ? int.parse(tempsEntreConsultesController.text)
                 : 5,
-            urlImatges: urlImatges!,
+            urlImatges: urlImatges!, // Pasando el valor de urlImatges
             bearer: _bearer.text,
             endpoint: _endPoint.text,
           ),
@@ -123,11 +126,21 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     }
   }
 
+  // Llamada al callback para iniciar/detener polling en MainWidget
+  /*void toggleAutoFetch(bool value) {
+    setState(() {
+      isAutoFetching = value;
+    });
+    _mainWidgetKey.currentState?.widget.onTogglePolling(value);
+  }*/
+
   Future<void> _fetchData() async {
     // Reemplazar {idTablet} en el endpoint con el valor de _idTablet.text
     final String apiUrl = '${_UrlApi.text}${_endPoint.text}';
+    print('${_UrlApi.text}${_endPoint.text}}');
     // https://platformpre.assegur.com/api/tablets/tablet-test-01/url
-    url = apiUrl;
+    url =
+        apiUrl; // Esta variable solo esta tomando el valor de la API cuando se ejecuta la función ❌
     try {
       // Hacer la petición GET a la API con el header de autorización Bearer
       final response = await http.get(
@@ -162,13 +175,14 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
         // Navegar a ErrorFound con el mensaje de excepción y el estado de la respuesta
         Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ErrorFound(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ErrorFound(
                 errorMessage: response.body,
-                errorException: response.statusCode),
-          ),
-        );
+                errorException: response.statusCode,
+                errorUrl: apiUrl,
+              ),
+            ));
       }
     } catch (e) {
       print(apiUrl);
@@ -180,6 +194,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         MaterialPageRoute(
           builder: (context) => ErrorFound(
             errorMessage: e.toString(),
+            errorUrl: '',
           ),
         ),
       );
@@ -193,10 +208,21 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
   void _loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Borrar los datos guardados en SharedPreferences
+    await prefs.remove('ideTablet');
+    await prefs.remove('urlApi');
+    await prefs.remove('endPoint');
+    await prefs.remove('bearer');
+    await prefs.remove('token');
+    await prefs.remove('tempsEntreAnimacinons');
+    await prefs.remove('urlImatges');
+
+    // Método para controlar el inicio y añadir los elementos
     setState(() {
-      _idTablet.text = prefs.getString('idTablet') ?? 'Taula09';
+      _idTablet.text = prefs.getString('idTablet') ?? _idTablet.text;
       _UrlApi.text =
-          prefs.getString('urlApi') ?? url;
+          prefs.getString('urlApi') ?? _UrlApi.text; // Cambia 'test' a 'urlApi'
       _endPoint.text =
           prefs.getString('endPoint') ?? 'api/tablets/${_idTablet.text}/url';
       _bearer.text = prefs.getString('bearer') ??
@@ -204,7 +230,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
       tempsEntreConsultesController.text =
           (prefs.getInt('tempsEntreAnimacions') ?? 5).toString();
       urlImatgesController.text =
-          prefs.getString('urlImatges') ?? 'https://assegur.com/img/tauletes';
+          prefs.getString('urlImatges') ?? 'https://assegur.com/img/tauletes/';
     });
   }
 
@@ -219,7 +245,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                 urlApi: '',
                 tempsEntreAnimacions: 5,
                 urlImatges: 'https://www.assegur.com/img/tauletes/',
-                bearer: '',
+                bearer: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI',
                 endpoint: '',
               )
             : _buildForm(),
@@ -348,7 +374,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                         foregroundColor: WidgetStatePropertyAll(Colors.black)),
                     onPressed: () async {
                       try {
-                        // Usamos launchUrlString en lugar de launchUrl
+                        // Usamos launchUrlString en lugar de launchUrl para obtener el enlace directo
                         bool launched = await launchUrlString(
                           urlUpdate,
                           mode: LaunchMode.externalApplication,
@@ -364,7 +390,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Botón para hacer petició a la Api
+                // Botón para hacer petición a la Api
                 SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -375,9 +401,6 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                                 WidgetStatePropertyAll(Colors.black)),
                         onPressed: _fetchData,
                         child: const Text('Fer petició'))),
-                const SizedBox(
-                  height: 16,
-                ),
               ],
             ),
           ),
@@ -391,8 +414,13 @@ class ErrorFound extends StatelessWidget {
   final String errorMessage;
 
   final int? errorException; // Parametres opcionals
+  final String errorUrl; // Parametres opcionals
 
-  const ErrorFound({Key? key, required this.errorMessage, this.errorException})
+  const ErrorFound(
+      {Key? key,
+      required this.errorMessage,
+      this.errorException,
+      required this.errorUrl})
       : super(key: key);
 
   @override
@@ -405,8 +433,9 @@ class ErrorFound extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            '''Error en la petició -> $errorMessage  
+            ''' Error en la petició -> $errorMessage  
                 Error -> $errorException
+                A la url -> $errorUrl
               ''',
             style: const TextStyle(fontSize: 16, color: Colors.red),
             textAlign: TextAlign.center,

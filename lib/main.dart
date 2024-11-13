@@ -47,7 +47,7 @@ void main() {
           urlImatges: configuracio.urlImatges,
           urlApi: '',
           endpoint: configuracio.agentsSignatureEndPoint,
-          bearer: configuracio.agentsSignatureEndPoint,
+          bearer: configuracio.agentsSignatureEndPoint, 
         ),
         debugShowCheckedModeBanner: false,
         routes: {
@@ -61,9 +61,9 @@ void main() {
                 id: configuracio.id,
                 tempsEntreAnimacions: int.tryParse(configuracio.temps),
                 urlImatges: configuracio.urlImatges,
-                urlApi: 'https://platform.assegur.com',
+                urlApi: '',
                 endpoint: configuracio.agentsSignatureEndPoint,
-                bearer: configuracio.agentsSignaturebearer,
+                bearer: configuracio.agentsSignaturebearer, 
               ),
         },
       ),
@@ -74,7 +74,7 @@ void main() {
 class MainWidget extends StatefulWidget {
   final String username;
   final int? tempsEntreAnimacions;
-  final String? urlImatges;
+  final String urlImatges;
   final String id;
   final String bearer;
   final String endpoint;
@@ -85,7 +85,7 @@ class MainWidget extends StatefulWidget {
     required this.username,
     required this.id,
     this.tempsEntreAnimacions,
-    this.urlImatges,
+    required this.urlImatges,
     required this.bearer,
     required this.endpoint,
     required this.urlApi,
@@ -108,7 +108,7 @@ class MainWidgetState extends State<MainWidget> {
   void initState() {
     super.initState();
     _loadConfig();
-    startPolling();
+    //startPolling(); -> Activa peticiones automaticas en el main widget
   }
 
   Future<void> _loadConfig() async {
@@ -121,13 +121,18 @@ class MainWidgetState extends State<MainWidget> {
   }
 
   // Método para iniciar las peticiones automáticas
-  void startPolling() {
+  /*void startPolling() {
     _timer ??= Timer.periodic(Duration(seconds: 1), (timer) async {
       await _fetchData();
     });
-  }
+  }*/
 
-  Future<void> _fetchData() async {
+  /*void stopPolling() {
+    _timer?.cancel();
+    _timer = null;
+  }*/
+
+  Future<void> _fetchData() async { // Funcion que hace las peticiones automáticas
     if (apiUrl == null || bearerToken == null || idTablet == null) return;
 
     final String? fullUrl = apiUrl;
@@ -172,7 +177,7 @@ class MainWidgetState extends State<MainWidget> {
         children: [
           if (!showWebView)
             // El carrusel se muestra siempre hasta que `showWebView` sea verdadero
-            ImageCarousel(animationInterval: widget.tempsEntreAnimacions ?? 5),
+            ImageCarousel(animationInterval: widget.tempsEntreAnimacions ?? 5,urlimatges: widget.urlImatges,),
           if (showWebView && currentUrl != null)
             WebViewContainer(
                 url: currentUrl!), // Muestra el WebView si la URL es válida
@@ -199,7 +204,7 @@ class MenuData extends StatefulWidget {
   _MenuDataState createState() => _MenuDataState();
 }
 
-/*
+  /*
     Clase _MenuDataState:
     Esta clase se encarga de gestionar el comportamiento del menu.
     Asi como la animacion ,tiempo,duracion,tamaño del menu
@@ -335,11 +340,8 @@ class _MenuDataState extends State<MenuData>
                       children: [
                         const SizedBox(height: 35),
                         _buildMenuButton('Inici', Icons.home, isMain: true),
-                        _buildMenuButton('Admin', Icons.admin_panel_settings,
-                            isAdmin: true),
-                        _buildMenuButton(
-                          'Desconnectar',
-                          Icons.logout,
+                        _buildMenuButton('Admin', Icons.admin_panel_settings,isAdmin: true),
+                        _buildMenuButton('Desconnectar', Icons.logout,
                         ),
                       ],
                     ),
@@ -359,10 +361,8 @@ class _MenuDataState extends State<MenuData>
       Acceso al resto de widgets y estados de la aplicacion
     */
   // Método para construir los botones del Drawer
-  Widget _buildMenuButton(String title, IconData icon,
-      {bool isAdmin = false, bool isMain = false}) {
-    bool isSelected =
-        _selectedMenu == title; // Verificar si este botón está seleccionado
+  Widget _buildMenuButton(String title, IconData icon, {bool isAdmin = false, bool isMain = false}) {
+    bool isSelected = _selectedMenu == title; // Verificar si este botón está seleccionado
     return ElevatedButton(
       onPressed: () async {
         // Cambiar el estado cuando se presiona el botón
@@ -390,7 +390,8 @@ class _MenuDataState extends State<MenuData>
                 id: 'Taula09',
                 urlApi: '',
                 bearer: '',
-                endpoint: '',
+                endpoint: '', 
+                urlImatges: '',
               ),
             ),
           );
