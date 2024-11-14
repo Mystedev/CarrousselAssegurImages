@@ -11,12 +11,12 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewContainer extends StatefulWidget {
   final String url;
-  final String urlDate;
+  //final String urlDate;
   final String urlTablet;
 
   const WebViewContainer({super.key, 
     required this.url,
-    required this.urlDate,
+    //required this.urlDate,
     required this.urlTablet
     });
 
@@ -75,10 +75,10 @@ class _WebViewContainerState extends State<WebViewContainer> {
               const SizedBox(
                 height: 5,
               ),
-              Text(widget.urlDate,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
-              const SizedBox(
-                height: 5,
-              ),
+              //Text(widget.urlDate,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
+              //const SizedBox(
+                //height: 5,
+              //),
               Text(widget.urlTablet,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
               const SizedBox(
                 height: 5,

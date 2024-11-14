@@ -184,7 +184,7 @@ class MainWidgetState extends State<MainWidget> {
             ),
           if (showWebView && currentUrl != null)
             WebViewContainer(
-                urlDate: '',
+                //urlDate: '',
                 urlTablet: '',
                 url: currentUrl!), // Muestra el WebView si la URL es válida
           MenuData(key: GlobalKey<_MenuDataState>()),

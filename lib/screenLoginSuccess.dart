@@ -30,7 +30,6 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   late TextEditingController _UrlApi;
   late TextEditingController _endPoint;
   late TextEditingController _bearer;
-  String url = '';
   bool isLoading = false;
   final GlobalKey<MainWidgetState> _mainWidgetKey =
       GlobalKey<MainWidgetState>();
@@ -48,9 +47,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     urlImatgesController =
         TextEditingController(text: 'https://assegur.com/img/tauletes/');
     _idTablet = TextEditingController(text: 'Taula20');
-    _UrlApi = TextEditingController(text: 'https://platform.assegur.com/');
-    var text = 'api/tablet/$_idTablet/url';
-    _endPoint = TextEditingController(text: text);
+    _UrlApi = TextEditingController(text: 'https://platformpre.assegur.com/');
+    _endPoint = TextEditingController(text: 'api/tablet/$_idTablet/url');
     _bearer = TextEditingController(
         text:
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI');
@@ -140,8 +138,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     final String apiUrl = '${_UrlApi.text}${_endPoint.text}';
     print('${_UrlApi.text}${_endPoint.text}}');
     // https://platformpre.assegur.com/api/tablets/tablet-test-01/url
-    url =
-        apiUrl; // Esta variable solo esta tomando el valor de la API cuando se ejecuta la función ❌
+    //final String apiUrl = 'https://random-data-api.com/api/v3/projects/e9b7f79a-4f7e-48ed-be61-b3422bdb5ac8';
+    //url =apiUrl; // Esta variable solo esta tomando el valor de la API cuando se ejecuta la función ❌
     try {
       // Hacer la petición GET a la API con el header de autorización Bearer
       final response = await http.get(
@@ -167,8 +165,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           context,
           MaterialPageRoute(
             builder: (context) => WebViewContainer(
-              url: apiUrl,
-              urlDate: urlDate,
+              url: url,
+              //urlDate: urlDate,
               urlTablet: urlTablet,
             ),
           ),
@@ -185,7 +183,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
               builder: (context) => ErrorFound(
                 errorMessage: response.body,
                 errorException: response.statusCode,
-                errorUrl: '',
+                errorUrl: apiUrl,
               ),
             ));
       }
@@ -216,7 +214,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
 
     // Borrar los datos guardados en SharedPreferences
     await prefs.remove('ideTablet');
-    await prefs.remove('urlApi');
+    //await prefs.remove('urlApi');
     await prefs.remove('endPoint');
     await prefs.remove('bearer');
     await prefs.remove('token');
@@ -226,8 +224,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     // Método para controlar el inicio y añadir los elementos
     setState(() {
       _idTablet.text = prefs.getString('idTablet') ?? _idTablet.text;
-      _UrlApi.text =
-          prefs.getString('urlApi') ?? _UrlApi.text; // Cambia 'test' a 'urlApi'
+      _UrlApi.text = prefs.getString('urlApi') ?? _UrlApi.text; // Cambia 'test' a 'urlApi'
       _endPoint.text =
           prefs.getString('endPoint') ?? 'api/tablets/${_idTablet.text}/url';
       _bearer.text = prefs.getString('bearer') ??
