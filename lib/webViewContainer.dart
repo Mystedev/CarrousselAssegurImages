@@ -11,8 +11,14 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewContainer extends StatefulWidget {
   final String url;
+  final String urlDate;
+  final String urlTablet;
 
-  const WebViewContainer({super.key, required this.url});
+  const WebViewContainer({super.key, 
+    required this.url,
+    required this.urlDate,
+    required this.urlTablet
+    });
 
   @override
   _WebViewContainerState createState() => _WebViewContainerState();
@@ -63,8 +69,22 @@ class _WebViewContainerState extends State<WebViewContainer> {
             ),
           ),
           Container(
-            child: Text(widget.url),
-          ),
+              child: Column(
+            children: [
+              Text(widget.url,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244)),),
+              const SizedBox(
+                height: 5,
+              ),
+              Text(widget.urlDate,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
+              const SizedBox(
+                height: 5,
+              ),
+              Text(widget.urlTablet,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
+              const SizedBox(
+                height: 5,
+              ),
+            ],
+          )),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -80,8 +100,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
                   borderRadius: BorderRadius.circular(40),
                 ),
                 elevation: 5,
-                shadowColor: const Color.fromARGB(255, 119, 164, 183)
-                    .withOpacity(0.5),
+                shadowColor:
+                    const Color.fromARGB(255, 119, 164, 183).withOpacity(0.5),
               ),
               onPressed: _isLoading
                   ? null // Desactivar el botón cuando está cargando
@@ -94,15 +114,14 @@ class _WebViewContainerState extends State<WebViewContainer> {
                       await Future.delayed(Duration(seconds: 1));
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) =>
-                              MainWidget(
-                                username: 'admin', 
-                                id: 'Taula09', 
-                                urlApi: '',
-                                endpoint: '',
-                                bearer: '',
-                                urlImatges: '',
-                                ),
+                          builder: (context) => MainWidget(
+                            username: 'admin',
+                            id: 'Taula09',
+                            urlApi: '',
+                            endpoint: '',
+                            bearer: '',
+                            urlImatges: '',
+                          ),
                         ),
                       );
                       setState(() {

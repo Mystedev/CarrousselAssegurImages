@@ -47,7 +47,7 @@ void main() {
           urlImatges: configuracio.urlImatges,
           urlApi: '',
           endpoint: configuracio.agentsSignatureEndPoint,
-          bearer: configuracio.agentsSignatureEndPoint, 
+          bearer: configuracio.agentsSignatureEndPoint,
         ),
         debugShowCheckedModeBanner: false,
         routes: {
@@ -63,7 +63,7 @@ void main() {
                 urlImatges: configuracio.urlImatges,
                 urlApi: '',
                 endpoint: configuracio.agentsSignatureEndPoint,
-                bearer: configuracio.agentsSignaturebearer, 
+                bearer: configuracio.agentsSignaturebearer,
               ),
         },
       ),
@@ -132,7 +132,8 @@ class MainWidgetState extends State<MainWidget> {
     _timer = null;
   }*/
 
-  Future<void> _fetchData() async { // Funcion que hace las peticiones automáticas
+  Future<void> _fetchData() async {
+    // Funcion que hace las peticiones automáticas
     if (apiUrl == null || bearerToken == null || idTablet == null) return;
 
     final String? fullUrl = apiUrl;
@@ -177,9 +178,14 @@ class MainWidgetState extends State<MainWidget> {
         children: [
           if (!showWebView)
             // El carrusel se muestra siempre hasta que `showWebView` sea verdadero
-            ImageCarousel(animationInterval: widget.tempsEntreAnimacions ?? 5,urlimatges: widget.urlImatges,),
+            ImageCarousel(
+              animationInterval: widget.tempsEntreAnimacions ?? 5,
+              urlimatges: widget.urlImatges,
+            ),
           if (showWebView && currentUrl != null)
             WebViewContainer(
+                urlDate: '',
+                urlTablet: '',
                 url: currentUrl!), // Muestra el WebView si la URL es válida
           MenuData(key: GlobalKey<_MenuDataState>()),
         ],
@@ -204,7 +210,7 @@ class MenuData extends StatefulWidget {
   _MenuDataState createState() => _MenuDataState();
 }
 
-  /*
+/*
     Clase _MenuDataState:
     Esta clase se encarga de gestionar el comportamiento del menu.
     Asi como la animacion ,tiempo,duracion,tamaño del menu
@@ -340,8 +346,11 @@ class _MenuDataState extends State<MenuData>
                       children: [
                         const SizedBox(height: 35),
                         _buildMenuButton('Inici', Icons.home, isMain: true),
-                        _buildMenuButton('Admin', Icons.admin_panel_settings,isAdmin: true),
-                        _buildMenuButton('Desconnectar', Icons.logout,
+                        _buildMenuButton('Admin', Icons.admin_panel_settings,
+                            isAdmin: true),
+                        _buildMenuButton(
+                          'Desconnectar',
+                          Icons.logout,
                         ),
                       ],
                     ),
@@ -361,8 +370,10 @@ class _MenuDataState extends State<MenuData>
       Acceso al resto de widgets y estados de la aplicacion
     */
   // Método para construir los botones del Drawer
-  Widget _buildMenuButton(String title, IconData icon, {bool isAdmin = false, bool isMain = false}) {
-    bool isSelected = _selectedMenu == title; // Verificar si este botón está seleccionado
+  Widget _buildMenuButton(String title, IconData icon,
+      {bool isAdmin = false, bool isMain = false}) {
+    bool isSelected =
+        _selectedMenu == title; // Verificar si este botón está seleccionado
     return ElevatedButton(
       onPressed: () async {
         // Cambiar el estado cuando se presiona el botón
@@ -390,7 +401,7 @@ class _MenuDataState extends State<MenuData>
                 id: 'Taula09',
                 urlApi: '',
                 bearer: '',
-                endpoint: '', 
+                endpoint: '',
                 urlImatges: '',
               ),
             ),

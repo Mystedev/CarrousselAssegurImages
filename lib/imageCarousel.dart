@@ -11,7 +11,8 @@ class ImageCarousel extends StatefulWidget {
   final int animationInterval;
   final String urlimatges;
 
-  const ImageCarousel({Key? key, required this.animationInterval, required this.urlimatges})
+  const ImageCarousel(
+      {Key? key, required this.animationInterval, required this.urlimatges})
       : super(key: key);
 
   @override
@@ -20,7 +21,8 @@ class ImageCarousel extends StatefulWidget {
 
 class _ImageCarouselState extends State<ImageCarousel> {
   int _currentIndex = 0;
-  List<String> imageIds = List.generate(12, (index) => '${index + 1}'.padLeft(2, '0'));
+  List<String> imageIds =
+      List.generate(12, (index) => '${index + 1}'.padLeft(2, '0'));
   Timer? _timer;
 
   @override
@@ -39,7 +41,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
     final newCount = await _fetchImageCount();
     if (newCount > imageIds.length) {
       setState(() {
-        imageIds = List.generate(newCount, (index) => '${index + 1}'.padLeft(2, '0'));
+        imageIds =
+            List.generate(newCount, (index) => '${index + 1}'.padLeft(2, '0'));
       });
     }
   }
@@ -72,13 +75,15 @@ class _ImageCarouselState extends State<ImageCarousel> {
           itemCount: imageIds.length,
           itemBuilder: (context, index, realIndex) {
             // Generar la URL de la imagen usando widget.urlimatges
-            final imageUrl = '${widget.urlimatges}${imageIds[index]}-tauleta.jpg';
+            final imageUrl =
+                '${widget.urlimatges}${imageIds[index]}-tauleta.jpg';
 
             return AspectRatio(
-              aspectRatio: 16 / 9,  // Mantener la relación de aspecto
+              aspectRatio: 16 / 9, // Mantener la relación de aspecto
               child: CachedNetworkImage(
                 imageUrl: imageUrl,
-                fit: BoxFit.cover,  // Asegurar que la imagen cubra completamente el área
+                fit: BoxFit
+                    .cover, // Asegurar que la imagen cubra completamente el área
                 width: screenWidth,
                 height: screenHeight,
                 errorWidget: (context, url, error) => const Center(
@@ -88,12 +93,12 @@ class _ImageCarouselState extends State<ImageCarousel> {
             );
           },
           options: CarouselOptions(
-            height: screenHeight,  // Usar la altura de la pantalla
+            height: screenHeight, // Usar la altura de la pantalla
             autoPlay: true,
             autoPlayInterval: Duration(seconds: widget.animationInterval),
             autoPlayAnimationDuration: const Duration(milliseconds: 800),
             autoPlayCurve: Curves.easeInOut,
-            viewportFraction: 1.0,  // Usar todo el ancho de la pantalla
+            viewportFraction: 1.0, // Usar todo el ancho de la pantalla
             onPageChanged: (index, reason) {
               setState(() {
                 _currentIndex = index;

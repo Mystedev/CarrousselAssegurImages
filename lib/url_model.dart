@@ -7,6 +7,6 @@ class UrlModel with ChangeNotifier {
 
   void setLinkUrl(String url) {
     _linkUrl = url;
-    notifyListeners(); 
+    notifyListeners();
   }
 }

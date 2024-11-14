@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_caroussel/main.dart';
 import 'package:flutter_caroussel/webViewContainer.dart';
@@ -158,6 +159,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         // Decodifica la respuesta JSON y extrae la URL
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final String url = responseBody['url'];
+        final String urlTablet = responseBody['tablet'];
+        final String urlDate = responseBody['creationDate'];
 
         // Mostrar la URL obtenida en el WebViewContainer para renderizar el contenido
         Navigator.pushReplacement(
@@ -165,13 +168,15 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           MaterialPageRoute(
             builder: (context) => WebViewContainer(
               url: apiUrl,
+              urlDate: urlDate,
+              urlTablet: urlTablet,
             ),
           ),
         );
       } else {
         print(apiUrl);
         print('Error HTTP rebut: ${response.statusCode}');
-        print(response.body);
+        print(response);
 
         // Navegar a ErrorFound con el mensaje de excepción y el estado de la respuesta
         Navigator.push(
@@ -180,7 +185,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
               builder: (context) => ErrorFound(
                 errorMessage: response.body,
                 errorException: response.statusCode,
-                errorUrl: apiUrl,
+                errorUrl: '',
               ),
             ));
       }
@@ -245,7 +250,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                 urlApi: '',
                 tempsEntreAnimacions: 5,
                 urlImatges: 'https://www.assegur.com/img/tauletes/',
-                bearer: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI',
+                bearer:
+                    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI',
                 endpoint: '',
               )
             : _buildForm(),
@@ -416,11 +422,12 @@ class ErrorFound extends StatelessWidget {
   final int? errorException; // Parametres opcionals
   final String errorUrl; // Parametres opcionals
 
+
   const ErrorFound(
       {Key? key,
       required this.errorMessage,
       this.errorException,
-      required this.errorUrl})
+      required this.errorUrl,})
       : super(key: key);
 
   @override
@@ -433,9 +440,9 @@ class ErrorFound extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16.0),
           child: Text(
-            ''' Error en la petició -> $errorMessage  
-                Error -> $errorException
-                A la url -> $errorUrl
+              '''  
+                Error exception-> $errorException
+                Url -> $errorUrl
               ''',
             style: const TextStyle(fontSize: 16, color: Colors.red),
             textAlign: TextAlign.center,

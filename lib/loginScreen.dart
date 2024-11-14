@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_caroussel/configuracio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import 'screenLoginSuccess.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,12 +12,11 @@ class LoginScreen extends StatefulWidget {
   final String bearer;
   final String endpoint;
 
-  const LoginScreen({
-    super.key,
-    required this.id,
-    required this.bearer,
-    required this.endpoint
-    });
+  const LoginScreen(
+      {super.key,
+      required this.id,
+      required this.bearer,
+      required this.endpoint});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -112,7 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,40 +120,39 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'User',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.person),
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'User',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.person),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.password),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.password),
+                ),
+                obscureText: true,
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _handleLogin,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.black,
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleLogin,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Login'),
               ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Login'),
-            ),
-          ]  
-        ),
+            ]),
       ),
     );
   }
