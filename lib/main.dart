@@ -184,7 +184,7 @@ class MainWidgetState extends State<MainWidget> {
             ),
           if (showWebView && currentUrl != null)
             WebViewContainer(
-                //urlDate: '',
+                urlDate: '',
                 urlTablet: '',
                 url: currentUrl!), // Muestra el WebView si la URL es válida
           MenuData(key: GlobalKey<_MenuDataState>()),
@@ -211,10 +211,10 @@ class MenuData extends StatefulWidget {
 }
 
 /*
-    Clase _MenuDataState:
-    Esta clase se encarga de gestionar el comportamiento del menu.
-    Asi como la animacion ,tiempo,duracion,tamaño del menu
-  */
+  Clase _MenuDataState:
+  Esta clase se encarga de gestionar el comportamiento del menu.
+  Asi como la animacion ,tiempo,duracion,tamaño del menu
+*/
 class _MenuDataState extends State<MenuData>
     with SingleTickerProviderStateMixin {
   double _drawerOffset = -250; // Valor inicial del drawer
@@ -248,22 +248,18 @@ class _MenuDataState extends State<MenuData>
   }
 
   /*
-      Clase build:
-      Esta clase se encarga de construir el widget de la barra lateral oculta.
-      La seccion de inicio permanece vacia mientras no se defina una configuracion.
-      Aqui encontraremos botones para acceder a otros widgets asi como :
-      Seccion de inicio de sesion
-      Seccion de inicio de la App
-      Seccion de desconectar la sesión
-    */
+    Clase build:
+    Esta clase se encarga de construir el widget de la barra lateral oculta.
+    La seccion de inicio permanece vacia mientras no se defina una configuracion.
+    Aqui encontraremos botones para acceder a otros widgets asi como :
+    Seccion de inicio de sesion
+    Seccion de inicio de la App
+    Seccion de desconectar la sesión
+  */
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    double verticalLimit = screenHeight / 2; // Límite vertical
-    double horizontalLimit =
-        screenWidth / 2; // Solo entre mitad izquierda y borde izquierdo
-
+    double verticalLimit = screenHeight / 2; // Límite para abrir el drawer
     return WillPopScope(
       onWillPop: () async {
         if (_drawerOffset != -250) {
@@ -276,9 +272,8 @@ class _MenuDataState extends State<MenuData>
         children: [
           GestureDetector(
             onHorizontalDragStart: (details) {
-              // Verificar que el toque inicie en la mitad izquierda de la pantalla
-              if (details.localPosition.dx <= horizontalLimit &&
-                  details.localPosition.dy <= verticalLimit) {
+              if (details.localPosition.dy <= verticalLimit ||
+                  _drawerOffset != -250) {
                 _isDragging = true;
               }
             },
@@ -336,8 +331,10 @@ class _MenuDataState extends State<MenuData>
                     decoration: BoxDecoration(
                       color: const Color.fromARGB(205, 255, 255, 255),
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(15),
-                        bottomRight: Radius.circular(15),
+                        topRight: Radius.circular(
+                            15), // Borde superior derecho redondeado
+                        bottomRight: Radius.circular(
+                            15), // Borde inferior derecho redondeado
                       ),
                     ),
                     child: Column(
@@ -365,10 +362,10 @@ class _MenuDataState extends State<MenuData>
   }
 
   /*
-      Clase _buildMenuButton:
-      Esta clase se encarga de construir los botones del Drawer , los cuales nos daran
-      Acceso al resto de widgets y estados de la aplicacion
-    */
+    Clase _buildMenuButton:
+    Esta clase se encarga de construir los botones del Drawer , los cuales nos daran
+    Acceso al resto de widgets y estados de la aplicacion
+  */
   // Método para construir los botones del Drawer
   Widget _buildMenuButton(String title, IconData icon,
       {bool isAdmin = false, bool isMain = false}) {
@@ -401,30 +398,30 @@ class _MenuDataState extends State<MenuData>
                 id: 'Taula09',
                 urlApi: '',
                 bearer: '',
-                endpoint: '',
-                urlImatges: '',
+                endpoint: '', urlImatges: '',
+                
               ),
             ),
           );
         } /*else if (isDisconnect) {
-            // Obtener las preferencias para verificar si hay una sesión activa
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+          // Obtener las preferencias para verificar si hay una sesión activa
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-            if (isLoggedIn) {
-              // Mostrar la alerta de confirmación si hay sesión activa
-              print('Asking to logout the session');
-              _showLogoutConfirmationDialog(context);
-            } else {
-              // Informar al usuario si no hay ninguna sesión activa
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No hi ha cap sessió activa'),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            }
-          }*/
+          if (isLoggedIn) {
+            // Mostrar la alerta de confirmación si hay sesión activa
+            print('Asking to logout the session');
+            _showLogoutConfirmationDialog(context);
+          } else {
+            // Informar al usuario si no hay ninguna sesión activa
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No hi ha cap sessió activa'),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        }*/
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: isSelected ? Colors.white : Colors.black,
@@ -448,45 +445,45 @@ class _MenuDataState extends State<MenuData>
   }
 
   /* void _showLogoutConfirmationDialog(BuildContext context) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Confirmar Desconnexió'),
-            content: const Text('¿Estás segur de que vols tancar la sessió?'),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancelar'),
-                onPressed: () {
-                  // Cerrar el cuadro de diálogo sin desconectar
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Tancar sessió'),
-                onPressed: () async {
-                  // Proceder a cerrar la sesión
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  // Eliminar el estado de sesión
-                  await prefs.remove('isLoggedIn');
-                  // Redirigir al login
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (context) => MainWidget(
-                              username: 'admin',
-                              id: 'Taula09',
-                              urlApi: '',
-                            )),
-                    (Route<dynamic> route) =>
-                        false, // Eliminar todas las rutas anteriores
-                  );
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirmar Desconnexió'),
+          content: const Text('¿Estás segur de que vols tancar la sessió?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                // Cerrar el cuadro de diálogo sin desconectar
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Tancar sessió'),
+              onPressed: () async {
+                // Proceder a cerrar la sesión
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                // Eliminar el estado de sesión
+                await prefs.remove('isLoggedIn');
+                // Redirigir al login
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (context) => MainWidget(
+                            username: 'admin',
+                            id: 'Taula09',
+                            urlApi: '',
+                          )),
+                  (Route<dynamic> route) =>
+                      false, // Eliminar todas las rutas anteriores
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
-  */
+}
+*/
 }

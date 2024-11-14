@@ -153,11 +153,10 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
       // Si el estado de la respuesta es '200' , esta es correcta y se ha recibido correctamente
       if (response.statusCode == 200) {
         print('Petició exitosa amb id ${_idTablet.text}');
-
         // Decodifica la respuesta JSON y extrae la URL
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
         final String url = responseBody['url'];
-        final String urlTablet = responseBody['tablet'];
+        final String urlTablet = responseBody['id'];
         final String urlDate = responseBody['creationDate'];
 
         // Mostrar la URL obtenida en el WebViewContainer para renderizar el contenido
@@ -166,7 +165,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           MaterialPageRoute(
             builder: (context) => WebViewContainer(
               url: url,
-              //urlDate: urlDate,
+              urlDate: urlDate,
               urlTablet: urlTablet,
             ),
           ),
@@ -197,7 +196,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         MaterialPageRoute(
           builder: (context) => ErrorFound(
             errorMessage: e.toString(),
-            errorUrl: '',
+            errorUrl: 'Excepció en $apiUrl: ',
           ),
         ),
       );
