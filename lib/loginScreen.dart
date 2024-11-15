@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController = TextEditingController();
   late TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
-
+  // Datos de configuracion que contiene los datos que se deben validar
   final Configuracio configuracio = const Configuracio(
     id: 'Taula09',
     user: 'admin',
@@ -44,8 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkLoginStatus();
-    _emailController = TextEditingController(text: configuracio.user);
-    _passwordController = TextEditingController(text: configuracio.password);
+    _emailController = TextEditingController(text: '');
+    _passwordController = TextEditingController(text: '');
   }
 
   // Verificar si ya está logueado
@@ -63,12 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Guardar estado de login exitoso
-  /*void _loginSuccessful() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isLoggedIn', true); // Guardar que el usuario está logueado
-  }*/
-
   void _handleLogin() async {
     setState(() {
       _isLoading = true;
@@ -78,10 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final String password = _passwordController.text;
 
     await Future.delayed(
-        const Duration(seconds: 2)); // Simulación de validación de login
+        const Duration(seconds: 2)); // Validación de login
 
     if (configuracio.validateCredentials(user, password)) {
-      //_loginSuccessful(); // Guardar la sesion
+      // Guardar la sesion
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) =>
@@ -145,8 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black,
+                  foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                  backgroundColor: const Color.fromARGB(255, 0, 0, 0),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)

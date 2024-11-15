@@ -15,9 +15,9 @@ class WebViewContainer extends StatefulWidget {
   final String urlTablet;
 
   const WebViewContainer({super.key, 
-    required this.url,
-    required this.urlDate,
-    required this.urlTablet,
+    required this.url,// Requiere de una url para mostrar en el webView
+    required this.urlDate, // Requiere un dato de la respuesta JSON
+    required this.urlTablet, // Requiere un Id de la respuesta JSON
     });
 
   @override
@@ -26,7 +26,7 @@ class WebViewContainer extends StatefulWidget {
 
 class _WebViewContainerState extends State<WebViewContainer> {
   bool _isLoading = false; // Variable para controlar el estado de carga
-  late final WebViewController _controller;
+  late final WebViewController _controller; // Controlador del webView
   @override
   void initState() {
     super.initState();
@@ -68,8 +68,10 @@ class _WebViewContainerState extends State<WebViewContainer> {
               ),
             ),
           ),
+          const SizedBox(height: 10,),
           Container(
               child: Column(
+                
             children: [
               Text(widget.url,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244)),),
               const SizedBox(
@@ -89,7 +91,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(248, 65, 157, 238),
+                backgroundColor: const Color.fromARGB(248, 110, 182, 245),
                 foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                 textStyle: const TextStyle(
                   fontSize: 35,
@@ -110,7 +112,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                         _isLoading = true; // Activar el estado de carga
                       });
 
-                      // Simulación de una operación que tarda
+                      // Redirige de vuelta al Widget de inicio donde se carga el carrusel de imagenes
                       await Future.delayed(Duration(seconds: 1));
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -120,7 +122,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                             urlApi: '',
                             endpoint: '',
                             bearer: '',
-                            urlImatges: '',
+                            urlImatges: 'https://www.assegur.com/img/tauletes/',
                           ),
                         ),
                       );
@@ -148,5 +150,3 @@ class _WebViewContainerState extends State<WebViewContainer> {
     );
   }
 }
-// API PRODUCCIO REAL
-//final String baseUrl = 'https://signaturit.assegur.com/AgentsSignature/api/tablets/';

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:dio/dio.dart';
@@ -33,10 +34,6 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   bool isLoading = false;
   final GlobalKey<MainWidgetState> _mainWidgetKey =
       GlobalKey<MainWidgetState>();
-  bool isAutoFetching = false;
-  Timer? _timer; // Timer para manejar las peticiones automáticas
-  String downloadProgress = "";
-  bool _isDownloading = false;
   final String urlUpdate =
       'https://drive.google.com/uc?export=download&id=1IA74y4QkyXs_DJ9hVzj1YBvxbXJ4IPgi';
 
@@ -60,8 +57,6 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   String? urlImatges;
   bool isFormValidated = false;
 
-  String? _downloadLink;
-
   // Funcion para guardar los datos introducidos en la configuracion del carrusel
   void _onDesar() async {
     if (_formKey.currentState!.validate()) {
@@ -74,7 +69,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
       setState(() {
         tempsEntreAnimacions = int.parse(tempsEntreConsultesController.text);
         urlImatges =
-            urlImatgesController.text; // Obtén el valor de urlImatges aquí
+            urlImatgesController.text; // Valor de urlImatges
         isFormValidated = true;
         isLoading = false;
       });
@@ -87,8 +82,9 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
       await prefs.setString('endPoint', _endPoint.text);
       await prefs.setString('bearer', _bearer.text);
       await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
-      await prefs.setString('urlImatges', urlImatges!); // Guardar urlImatges
+      await prefs.setString('urlImatges', urlImatges!); 
 
+      // Mostrar mensaje de confirmación de datos
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -125,21 +121,11 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     }
   }
 
-  // Llamada al callback para iniciar/detener polling en MainWidget
-  /*void toggleAutoFetch(bool value) {
-    setState(() {
-      isAutoFetching = value;
-    });
-    _mainWidgetKey.currentState?.widget.onTogglePolling(value);
-  }*/
-
   Future<void> _fetchData() async {
     // Reemplazar {idTablet} en el endpoint con el valor de _idTablet.text
     final String apiUrl = '${_UrlApi.text}${_endPoint.text}';
     print('${_UrlApi.text}${_endPoint.text}}');
     // https://platformpre.assegur.com/api/tablets/tablet-test-01/url
-    //final String apiUrl = 'https://random-data-api.com/api/v3/projects/e9b7f79a-4f7e-48ed-be61-b3422bdb5ac8';
-    //url =apiUrl; // Esta variable solo esta tomando el valor de la API cuando se ejecuta la función ❌
     try {
       // Hacer la petición GET a la API con el header de autorización Bearer
       final response = await http.get(
@@ -402,7 +388,9 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
                             foregroundColor:
                                 WidgetStatePropertyAll(Colors.black)),
                         onPressed: _fetchData,
-                        child: const Text('Fer petició'))),
+                        child: const Text('Fer petició')
+                      )
+                  ),
               ],
             ),
           ),

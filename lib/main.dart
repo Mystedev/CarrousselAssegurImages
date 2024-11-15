@@ -31,12 +31,13 @@ void main() {
     temps: '5',
     urlImatges: 'https://www.assegur.com/img/tauletes/',
     isValid: true,
-    agentsSignatureEndPoint: '/api/tablets/',
-    agentsSignaturebearer: 'af18a463fd6a3226d28c4f71722983bc',
+    agentsSignatureEndPoint: '',
+    agentsSignaturebearer: '',
     agentsSignatureIdTablet: 'Taula09',
     loggedInWithMicrosoftAccount: false,
   );
   runApp(
+    // Rutas de la aplicacion para moverse a distintos widgets
     ChangeNotifierProvider(
       create: (context) => UrlModel(),
       child: MaterialApp(
@@ -120,50 +121,6 @@ class MainWidgetState extends State<MainWidget> {
     });
   }
 
-  // Método para iniciar las peticiones automáticas
-  /*void startPolling() {
-    _timer ??= Timer.periodic(Duration(seconds: 1), (timer) async {
-      await _fetchData();
-    });
-  }*/
-
-  /*void stopPolling() {
-    _timer?.cancel();
-    _timer = null;
-  }*/
-
-  Future<void> _fetchData() async {
-    // Funcion que hace las peticiones automáticas
-    if (apiUrl == null || bearerToken == null || idTablet == null) return;
-
-    final String? fullUrl = apiUrl;
-    try {
-      final response = await http.get(
-        Uri.parse(fullUrl!),
-        headers: {
-          'Content-Type': 'aplication/json',
-          'Authorization': 'Bearer $bearerToken',
-        },
-      );
-      if (response.statusCode == 200) {
-        print('Petició exitosa amb id ${idTablet}');
-        final data = json.decode(response.body);
-        final url = data['url'];
-
-        if (url != null && url != currentUrl) {
-          setState(() {
-            currentUrl = url;
-            showWebView = true; // Mostrar WebView si la URL es válida
-          });
-        }
-      } else {
-        print('Error HTTP: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Exception in _fetchData: $e');
-    }
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -182,24 +139,13 @@ class MainWidgetState extends State<MainWidget> {
               animationInterval: widget.tempsEntreAnimacions ?? 5,
               urlimatges: widget.urlImatges,
             ),
-          if (showWebView && currentUrl != null)
-            WebViewContainer(
-                urlDate: '',
-                urlTablet: '',
-                url: currentUrl!), // Muestra el WebView si la URL es válida
-          MenuData(key: GlobalKey<_MenuDataState>()),
+          MenuData(key: GlobalKey<_MenuDataState>()),// Muestra un drawer oculto en la pantalla
         ],
       ),
     );
   }
 }
 
-/*
-    Clase MenuData:
-    Esta clase se encarga de gestionar el menu de la aplicación.
-    Esta se refiere a una barra lateral oculta que solo se muestra cuando hacemos drag
-    y la movemos del borde
-  */
 class MenuData extends StatefulWidget {
   const MenuData({super.key});
   static _MenuDataState? of(BuildContext context) {
@@ -210,11 +156,6 @@ class MenuData extends StatefulWidget {
   _MenuDataState createState() => _MenuDataState();
 }
 
-/*
-  Clase _MenuDataState:
-  Esta clase se encarga de gestionar el comportamiento del menu.
-  Asi como la animacion ,tiempo,duracion,tamaño del menu
-*/
 class _MenuDataState extends State<MenuData>
     with SingleTickerProviderStateMixin {
   double _drawerOffset = -250; // Valor inicial del drawer
@@ -247,15 +188,6 @@ class _MenuDataState extends State<MenuData>
     });
   }
 
-  /*
-    Clase build:
-    Esta clase se encarga de construir el widget de la barra lateral oculta.
-    La seccion de inicio permanece vacia mientras no se defina una configuracion.
-    Aqui encontraremos botones para acceder a otros widgets asi como :
-    Seccion de inicio de sesion
-    Seccion de inicio de la App
-    Seccion de desconectar la sesión
-  */
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -345,10 +277,6 @@ class _MenuDataState extends State<MenuData>
                         _buildMenuButton('Inici', Icons.home, isMain: true),
                         _buildMenuButton('Admin', Icons.admin_panel_settings,
                             isAdmin: true),
-                        _buildMenuButton(
-                          'Desconnectar',
-                          Icons.logout,
-                        ),
                       ],
                     ),
                   ),
@@ -361,11 +289,6 @@ class _MenuDataState extends State<MenuData>
     );
   }
 
-  /*
-    Clase _buildMenuButton:
-    Esta clase se encarga de construir los botones del Drawer , los cuales nos daran
-    Acceso al resto de widgets y estados de la aplicacion
-  */
   // Método para construir los botones del Drawer
   Widget _buildMenuButton(String title, IconData icon,
       {bool isAdmin = false, bool isMain = false}) {
@@ -398,30 +321,12 @@ class _MenuDataState extends State<MenuData>
                 id: 'Taula09',
                 urlApi: '',
                 bearer: '',
-                endpoint: '', urlImatges: '',
-                
+                endpoint: '',
+                urlImatges: 'https://www.assegur.com/img/tauletes/', // Verifica este valor
               ),
             ),
           );
-        } /*else if (isDisconnect) {
-          // Obtener las preferencias para verificar si hay una sesión activa
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
-          if (isLoggedIn) {
-            // Mostrar la alerta de confirmación si hay sesión activa
-            print('Asking to logout the session');
-            _showLogoutConfirmationDialog(context);
-          } else {
-            // Informar al usuario si no hay ninguna sesión activa
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('No hi ha cap sessió activa'),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
-          }
-        }*/
+        } 
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: isSelected ? Colors.white : Colors.black,
@@ -443,47 +348,4 @@ class _MenuDataState extends State<MenuData>
       ),
     );
   }
-
-  /* void _showLogoutConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar Desconnexió'),
-          content: const Text('¿Estás segur de que vols tancar la sessió?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                // Cerrar el cuadro de diálogo sin desconectar
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Tancar sessió'),
-              onPressed: () async {
-                // Proceder a cerrar la sesión
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                // Eliminar el estado de sesión
-                await prefs.remove('isLoggedIn');
-                // Redirigir al login
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (context) => MainWidget(
-                            username: 'admin',
-                            id: 'Taula09',
-                            urlApi: '',
-                          )),
-                  (Route<dynamic> route) =>
-                      false, // Eliminar todas las rutas anteriores
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-*/
 }
