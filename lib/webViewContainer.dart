@@ -69,24 +69,6 @@ class _WebViewContainerState extends State<WebViewContainer> {
             ),
           ),
           const SizedBox(height: 10,),
-          Container(
-              child: Column(
-                
-            children: [
-              Text(widget.url,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244)),),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(widget.urlDate,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(widget.urlTablet,style: TextStyle(color: const Color.fromARGB(255, 54, 177, 244))),
-              const SizedBox(
-                height: 5,
-              ),
-            ],
-          ),),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -138,7 +120,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: const [
-                        Text('Signar '),
+                        Text('Tancar'),
                         SizedBox(width: 20),
                         Icon(Icons.draw_outlined, size: 25),
                       ],

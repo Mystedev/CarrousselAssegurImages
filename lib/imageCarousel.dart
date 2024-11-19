@@ -21,7 +21,7 @@ class ImageCarousel extends StatefulWidget {
 
 class _ImageCarouselState extends State<ImageCarousel> {
   int _currentIndex = 0;
-  // Lista que añade las imagenes recogias del enlace 
+  // Lista que añade las imagenes recogias del enlace
   List<String> imageIds =
       List.generate(12, (index) => '${index + 1}'.padLeft(2, '0'));
   Timer? _timer;
@@ -34,18 +34,21 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   void _startAutoUpdate() {
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
-      await _checkForNewImages();// Si se añade alguna imagen nueva al enlace, se actualiza la lista
+      await _checkForNewImages(); // Si se añade alguna imagen nueva al enlace, se actualiza la lista
     });
   }
 
   Future<void> _checkForNewImages() async {
-    final newCount = await _fetchImageCount(); // Cuenta de nuevo el total de imagenes obtenidas
+    final newCount =
+        await _fetchImageCount(); // Cuenta de nuevo el total de imagenes obtenidas
     if (newCount > imageIds.length) {
       setState(() {
-        imageIds = List.generate(newCount, (index) => '${index + 1}'.padLeft(2, '0'));
+        imageIds =
+            List.generate(newCount, (index) => '${index + 1}'.padLeft(2, '0'));
       });
     }
   }
+
   // Obtiene la nueva lista de imagenes para mostrarlas en el carrusel
   Future<int> _fetchImageCount() async {
     final response = await http.get(Uri.parse(widget.urlimatges));
@@ -75,7 +78,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
           itemCount: imageIds.length,
           itemBuilder: (context, index, realIndex) {
             // Generar la URL de la imagen usando widget.urlimatges
-            final imageUrl = '${widget.urlimatges}${imageIds[index]}-tauleta.jpg';
+            final imageUrl =
+                '${widget.urlimatges}${imageIds[index]}-tauleta.jpg';
             // El carrusel de imagenes debe cubrir toda la pantalla
             return AspectRatio(
               aspectRatio: 16 / 9, // Mantener la relación de aspecto
@@ -91,7 +95,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
             );
           },
           options: CarouselOptions(
-            height: screenHeight, 
+            height: screenHeight,
             autoPlay: true, // Se inicia automaticamente
             autoPlayInterval: Duration(seconds: widget.animationInterval),
             autoPlayAnimationDuration: const Duration(milliseconds: 800),
@@ -102,7 +106,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
                 _currentIndex = index;
               });
             },
-            scrollPhysics: const NeverScrollableScrollPhysics(),// Desactiva los toques tactiles de la pantalla mientras se ejecuta el carrusel
+            scrollPhysics:
+                const NeverScrollableScrollPhysics(), // Desactiva los toques tactiles de la pantalla mientras se ejecuta el carrusel
           ),
         ),
       ),

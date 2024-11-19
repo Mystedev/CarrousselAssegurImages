@@ -1,0 +1,71 @@
+
+Future<void> _fetchData() async {
+    // Reemplazar {idTablet} en el endpoint con el valor de _idTablet.text
+    final String apiUrl = '${_UrlApi.text}${_endPoint.text}';
+    print('${_UrlApi.text}${_endPoint.text}}');
+    // https://platformpre.assegur.com/api/tablets/tablet-test-01/url
+    try {
+      // Hacer la petición GET a la API con el header de autorización Bearer
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        // El encabezado de la peticion es necesario para recibir la autorization 'Bearer token'
+        headers: {
+          'Content-Type': 'aplication/json',
+          'Authorization': 'Bearer ${_bearer.text}',
+        },
+      );
+      // Si el estado de la respuesta es '200' , esta es correcta y se ha recibido correctamente
+      if (response.statusCode == 200) {
+        print('Petició exitosa amb id ${_idTablet.text}');
+        // Decodifica la respuesta JSON y extrae la URL
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final String url = responseBody['url'];
+        final String urlTablet = responseBody['id'];
+        final String urlDate = responseBody['creationDate'];
+
+        // Mostrar la URL obtenida en el WebViewContainer para renderizar el contenido
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewContainer(
+              url: url,
+              urlDate: urlDate,
+              urlTablet: urlTablet,
+            ),
+          ),
+        );
+      } else {
+        print(apiUrl);
+        print('Error HTTP rebut: ${response.statusCode}');
+        print(response);
+
+        // Navegar a ErrorFound con el mensaje de excepción y el estado de la respuesta
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ErrorFound(
+                errorMessage: response.body,
+                errorException: response.statusCode,
+                errorUrl: apiUrl,
+              ),
+            ));
+      }
+    } catch (e) {
+      print(apiUrl);
+      print('Excepció: $e');
+
+      // En caso de excepción, mostrar el mensaje de error en ErrorFound
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ErrorFound(
+            errorMessage: e.toString(),
+            errorUrl: 'Excepció en $apiUrl: ',
+          ),
+        ),
+      );
+    }
+
+    // Retardo antes de intentar la petición de nuevo
+    await Future.delayed(const Duration(seconds: 5));
+  }

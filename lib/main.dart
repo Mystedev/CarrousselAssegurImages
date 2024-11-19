@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field, use_key_in_widget_constructors, prefer_final_fields, non_constant_identifier_names, sort_child_properties_last, use_build_context_synchronously, unnecessary_brace_in_string_interps
 import 'package:flutter/material.dart';
 import 'package:flutter_caroussel/configuracio.dart';
+import 'package:flutter_caroussel/errorFounWebView.dart';
 import 'package:flutter_caroussel/imageCarousel.dart';
 import 'package:flutter_caroussel/url_model.dart';
 import 'package:flutter_caroussel/webViewContainer.dart';
@@ -15,14 +16,6 @@ import 'dart:async';
 import 'loginScreen.dart';
 import 'screenLoginSuccess.dart';
 
-// ******************************************************************
-/*
-    Aplicación princiapl:
-    Esta se compone de un carrusel de imagenes solicitadas desde una API
-    y un widget para mostrar la información del clima , tambien obtenido de una API.
-    La seccion de inicio permanece vacia mientras no se defina una configuracion ni 
-    se haya hecho LOGIN del usuario del dispositivo.
-  */
 void main() {
   // Configuracion general del widget principal
   const configuracio = Configuracio(
@@ -103,13 +96,16 @@ class MainWidgetState extends State<MainWidget> {
   String? bearerToken;
   String? idTablet;
   String? url;
+  String? endpoint;
   bool showWebView = false;
+  bool isFetching = false;
 
   @override
   void initState() {
     super.initState();
-    _loadConfig();
-    //startPolling(); -> Activa peticiones automaticas en el main widget
+    _loadConfig().then((_) {
+      _startFetchingData();
+    });
   }
 
   Future<void> _loadConfig() async {
@@ -118,7 +114,92 @@ class MainWidgetState extends State<MainWidget> {
       apiUrl = prefs.getString('urlApi') ?? widget.urlApi;
       bearerToken = prefs.getString('bearer') ?? widget.bearer;
       idTablet = prefs.getString('idTablet') ?? widget.id;
+      endpoint = prefs.getString('endPoint') ?? widget.endpoint;
+
+      // Debugging: Verificar valores cargados
+      print('Carregat desde SharedPreferences:');
+      print('apiUrl: $apiUrl');
+      print('bearerToken: $bearerToken');
+      print('idTablet: $idTablet');
+      print('endpoint: $endpoint');
     });
+  }
+
+  void _startFetchingData() {
+    if (isFetching) {
+      print('Petició en curs. No es possible iniciar una nova.');
+      return; // Evitar múltiples instancias
+    }
+    isFetching = true;
+    print('Començant peticions...');
+    _attemptFetchData();
+  }
+
+  Future<void> _attemptFetchData() async {
+    while (isFetching) {
+      try {
+        final success = await _fetchData();
+        if (success) {
+          isFetching = false; // Finaliza el ciclo si es exitoso
+          print('Petició exitosa. Finalitzant intents.');
+        } else {
+          print('Resposta no exitosa. Probant de nou en 10 segundos...');
+        }
+      } catch (e) {
+        print('Excepción a la solicitut: $e. Probant de nou en 10 segundos...');
+      }
+
+      // Siempre espera 10 segundos entre intentos
+      if (isFetching) {
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    }
+    print('Petició finalitzada.');
+  }
+
+  void _stopFetchingData() {
+    isFetching = false;
+  }
+
+  Future<bool> _fetchData() async {
+    // Combinar urlApi y endpoint correctamente
+    final String apiUrlWithEndpoint = '$apiUrl$endpoint';
+    print('Obtenint dades de -> $apiUrlWithEndpoint');
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrlWithEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $bearerToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Dades rebudes.');
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final String url = responseBody['url'];
+        final String urlTablet = responseBody['id'];
+        final String urlDate = responseBody['creationDate'];
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WebViewContainer(
+              url: url,
+              urlDate: urlDate,
+              urlTablet: urlTablet,
+            ),
+          ),
+        );
+        return true; // Indica que se recibió una respuesta exitosa
+      } else {
+        print('Error HTTP rebut: ${response.statusCode}');
+        return false; // Continua el bucle
+      }
+    } catch (e) {
+      print('Excepció a la solicitut: $e');
+      return false; // Continua el bucle ante excepciones
+    }
   }
 
   @override
@@ -139,7 +220,9 @@ class MainWidgetState extends State<MainWidget> {
               animationInterval: widget.tempsEntreAnimacions ?? 5,
               urlimatges: widget.urlImatges,
             ),
-          MenuData(key: GlobalKey<_MenuDataState>()),// Muestra un drawer oculto en la pantalla
+          MenuData(
+              key: GlobalKey<
+                  _MenuDataState>()), // Muestra un drawer oculto en la pantalla
         ],
       ),
     );
@@ -294,14 +377,15 @@ class _MenuDataState extends State<MenuData>
       {bool isAdmin = false, bool isMain = false}) {
     bool isSelected =
         _selectedMenu == title; // Verificar si este botón está seleccionado
-    return ElevatedButton(
-      onPressed: () async {
-        // Cambiar el estado cuando se presiona el botón
-        setState(() {
-          _selectedMenu = title;
-        });
-        // Verificamos si es el botón de Admin
-        if (isAdmin) {
+    return InkWell(
+        child: ElevatedButton(
+          onPressed: () async {
+          // Cambiar el estado cuando se presiona el botón
+          setState(() {
+            _selectedMenu = title;
+          });
+          // Verificamos si es el botón de Admin
+          if (isAdmin) {
           // Navegar a la pantalla de login
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -312,40 +396,38 @@ class _MenuDataState extends State<MenuData>
               ),
             ),
           );
-        } else if (isMain) {
+          } else if (isMain) {
           // Navegar a la pantalla principal (MainWidget)
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => MainWidget(
-                username: 'admin',
-                id: 'Taula09',
-                urlApi: '',
-                bearer: '',
-                endpoint: '',
-                urlImatges: 'https://www.assegur.com/img/tauletes/', // Verifica este valor
-              ),
-            ),
-          );
-        } 
-      },
-      style: ElevatedButton.styleFrom(
-        foregroundColor: isSelected ? Colors.white : Colors.black,
-        backgroundColor: isSelected ? Colors.black : Colors.transparent,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18),
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MainWidget(
+                  username: 'admin',
+                  id: 'Taula09',
+                  urlApi: '',
+                  bearer: '',
+                  endpoint: '',
+                  urlImatges:
+                      'https://www.assegur.com/img/tauletes/', // Verifica este valor
+                  ),
+                ),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            foregroundColor: isSelected ? Colors.white : Colors.black,
+            backgroundColor: isSelected ? Colors.black: Colors.transparent,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           ),
-          const SizedBox(width: 20),
-          Icon(icon),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(title,style: const TextStyle(fontSize: 18),),
+              const SizedBox(width: 20),
+              Icon(icon)
         ],
       ),
-    );
+    ));
   }
 }
