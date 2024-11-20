@@ -32,10 +32,11 @@ void main() {
   );
   runApp(
     // Rutas de la aplicacion para moverse a distintos widgets
-     MultiProvider(
+    MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UrlModel()),
-        ChangeNotifierProvider(create: (context) => FetchController()), // Agrega FetchController
+        ChangeNotifierProvider(
+            create: (context) => FetchController()), // Agrega FetchController
       ],
       child: MaterialApp(
         home: MainWidget(
@@ -139,49 +140,45 @@ class MainWidgetState extends State<MainWidget> {
     attemptFetchData();
   }
 
-Future<void> attemptFetchData() async {
+  Future<void> attemptFetchData() async {
+    final String apiUrlWithEndpoint = '$apiUrl$endpoint';
 
- final String apiUrlWithEndpoint = '$apiUrl$endpoint';
-
-final fetchController = Provider.of<FetchController>(context, listen: false);
-fetchController.startFetching();
+    final fetchController =
+        Provider.of<FetchController>(context, listen: false);
+    fetchController.startFetching();
 
 //mirem si existeix o esta ben escrit el URL
-if (apiUrl != null && apiUrl!.isNotEmpty && endpoint != null && endpoint!.isNotEmpty) {
-  
-  while (isFetching) {
+    if (apiUrl != null &&
+        apiUrl!.isNotEmpty &&
+        endpoint != null &&
+        endpoint!.isNotEmpty) {
+      while (isFetching) {
+        isFetching = fetchController.isFetching;
 
-    isFetching = fetchController.isFetching;
-
-    print ("IS FETCHING: $isFetching ");
-      try {
-        final success = await _fetchData(apiUrlWithEndpoint);
-        if (success) {
-          isFetching = false; // Finaliza el ciclo si es exitoso
-          print('Petició exitosa. Finalitzant intents.');
-        } else {
-          print('Resposta no exitosa. Probant de nou en 1 segon...');
+        print("IS FETCHING: $isFetching ");
+        try {
+          final success = await _fetchData(apiUrlWithEndpoint);
+          if (success) {
+            isFetching = false; // Finaliza el ciclo si es exitoso
+            print('Petició exitosa. Finalitzant intents.');
+          } else {
+            print('Resposta no exitosa. Probant de nou en 1 segon...');
+          }
+        } catch (e) {
+          print('Excepció a la solicitut: $e. Probant de nou en 10 segon...');
         }
-      } catch (e) {
-        print('Excepció a la solicitut: $e. Probant de nou en 10 segon...');
+
+        // Siempre espera 10 segundos entre intentos
+
+        await Future.delayed(const Duration(seconds: 1));
       }
-
-      // Siempre espera 10 segundos entre intentos
- 
-      await Future.delayed(const Duration(seconds: 1));
-      
-    } 
-
-  }
+    }
     print('Petició finalitzada.');
     await Future.delayed(const Duration(seconds: 5));
     attemptFetchData();
-
   }
 
-
   Future<bool> _fetchData(String apiUrlWithEndpoint) async {
-
     try {
       print('Obtenint dades de -> $apiUrlWithEndpoint');
       final response = await http.get(
@@ -397,13 +394,13 @@ class _MenuDataState extends State<MenuData>
         _selectedMenu == title; // Verificar si este botón está seleccionado
     return InkWell(
         child: ElevatedButton(
-          onPressed: () async {
-          // Cambiar el estado cuando se presiona el botón
-          setState(() {
-            _selectedMenu = title;
-          });
-          // Verificamos si es el botón de Admin
-          if (isAdmin) {
+      onPressed: () async {
+        // Cambiar el estado cuando se presiona el botón
+        setState(() {
+          _selectedMenu = title;
+        });
+        // Verificamos si es el botón de Admin
+        if (isAdmin) {
           // Navegar a la pantalla de login
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -414,36 +411,39 @@ class _MenuDataState extends State<MenuData>
               ),
             ),
           );
-          } else if (isMain) {
+        } else if (isMain) {
           // Navegar a la pantalla principal (MainWidget)
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MainWidget(
-                  username: 'admin',
-                  id: 'Taula09',
-                  urlApi: '',
-                  bearer: '',
-                  endpoint: '',
-                  urlImatges:
-                      'https://www.assegur.com/img/tauletes/', // Verifica este valor
-                  ),
-                ),
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            foregroundColor: isSelected ? Colors.white : Colors.black,
-            backgroundColor: isSelected ? Colors.black: Colors.transparent,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MainWidget(
+                username: 'admin',
+                id: 'Taula09',
+                urlApi: '',
+                bearer: '',
+                endpoint: '',
+                urlImatges:
+                    'https://www.assegur.com/img/tauletes/', // Verifica este valor
+              ),
+            ),
+          );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        foregroundColor: isSelected ? Colors.white : Colors.black,
+        backgroundColor: isSelected ? Colors.black : Colors.transparent,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18),
           ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title,style: const TextStyle(fontSize: 18),),
-              const SizedBox(width: 20),
-              Icon(icon)
+          const SizedBox(width: 20),
+          Icon(icon)
         ],
       ),
     ));
