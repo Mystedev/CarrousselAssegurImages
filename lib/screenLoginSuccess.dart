@@ -7,9 +7,11 @@ import 'dart:io';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_caroussel/controller/fetchController.dart';
 import 'package:flutter_caroussel/main.dart';
 import 'package:flutter_caroussel/webViewContainer.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
@@ -34,6 +36,9 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
   bool isLoading = false;
   final GlobalKey<MainWidgetState> _mainWidgetKey =
       GlobalKey<MainWidgetState>();
+  
+  
+  
   final String urlUpdate =
       'https://drive.google.com/uc?export=download&id=1IA74y4QkyXs_DJ9hVzj1YBvxbXJ4IPgi';
 
@@ -45,7 +50,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         TextEditingController(text: 'https://assegur.com/img/tauletes/');
     _idTablet = TextEditingController(text: 'Taula20');
     _UrlApi = TextEditingController(text: 'https://platformpre.assegur.com/');
-    _endPoint = TextEditingController(text: 'api/tablet/$_idTablet/url');
+    _endPoint = TextEditingController(text: 'api/tablet/{idTablet}/url');
     _bearer = TextEditingController(
         text:
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI');
@@ -64,6 +69,12 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         isLoading = true;
       });
 
+      //Paramos el bucle
+     final fetchController = Provider.of<FetchController>(context, listen: false);
+     fetchController.stopFetching();
+
+      
+
       await Future.delayed(const Duration(seconds: 2));
 
       setState(() {
@@ -74,12 +85,21 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         isLoading = false;
       });
 
+
+   
+
       // Guardar los datos en SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
+       await prefs.clear();
+
+      //Creamos el endpoint con el ID de la tablet
+      String finalEndPoint = _endPoint.text.replaceAll("{idTablet}", _idTablet.text);
 
       await prefs.setString('idTablet', _idTablet.text);
       await prefs.setString('urlApi', _UrlApi.text);
       await prefs.setString('endPoint', _endPoint.text);
+      await prefs.setString("finalEndPoint", finalEndPoint);
       await prefs.setString('bearer', _bearer.text);
       await prefs.setInt('tempsEntreAnimacions', tempsEntreAnimacions!);
       await prefs.setString('urlImatges', urlImatges!); 
@@ -94,6 +114,8 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           backgroundColor: Color.fromARGB(255, 138, 231, 206),
         ),
       );
+
+      
 
       // Navegar a MainWidget, pasando la URL de las imágenes
       Navigator.pushReplacement(
@@ -112,6 +134,10 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
           ),
         ),
       );
+
+      //Tornem a iniciar el bucle
+      
+      
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -119,6 +145,9 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
         ),
       );
     }
+
+    
+
   }
 
   // Método para controlar el inicio o detención de las peticiones
@@ -140,8 +169,7 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     setState(() {
       _idTablet.text = prefs.getString('idTablet') ?? _idTablet.text;
       _UrlApi.text = prefs.getString('urlApi') ?? _UrlApi.text; // Cambia 'test' a 'urlApi'
-      _endPoint.text =
-          prefs.getString('endPoint') ?? 'api/tablets/${_idTablet.text}/url';
+      _endPoint.text = prefs.getString('endPoint') ?? 'api/tablets/{idTablet}/url';
       _bearer.text = prefs.getString('bearer') ??
           'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI';
       tempsEntreConsultesController.text =
@@ -151,19 +179,19 @@ class _MainWithLoginSuccessState extends State<MainWithLoginSuccess> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: isFormValidated
-            ? const MainWidget(
+            ? MainWidget(
                 username: 'admin',
                 id: 'Taula09',
                 urlApi: '',
                 tempsEntreAnimacions: 5,
-                urlImatges: 'https://www.assegur.com/img/tauletes/',
-                bearer:
-                    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJEaWdpdGFsIFNpZ25hdHVyZSIsImlhdCI6MTY1MjE4OTAzNiwiZXhwIjoxOTA0NjQ5ODQ5LCJhdWQiOiJhc2FwcHAwMyIsInN1YiI6InRhYmxldHNAYXNzZWd1ci5jb20ifQ.J8YkIZJW2a_n9rSvS-SPOuLsZ6KpTipQUc0n4xU-2sI',
+                urlImatges: urlImatgesController.text,
+                bearer: _bearer.text,
                 endpoint: '',
               )
             : _buildForm(),
