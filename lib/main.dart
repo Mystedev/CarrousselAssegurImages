@@ -50,6 +50,7 @@ void main() {
         ),
         debugShowCheckedModeBanner: false,
         routes: {
+          // Rutas de la App , pantalla Login y Pantalla Carrusel
           '/LoginScreen': (context) => LoginScreen(
                 id: configuracio.agentsSignatureIdTablet,
                 bearer: configuracio.agentsSignaturebearer,
@@ -112,7 +113,7 @@ class MainWidgetState extends State<MainWidget> {
       _startFetchingData();
     });
   }
-
+  // Funcion para cargar los datos de configuracion desde ScreenLoginSuccess
   Future<void> _loadConfig() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -129,7 +130,7 @@ class MainWidgetState extends State<MainWidget> {
       print('endpoint: $endpoint');
     });
   }
-
+  // Se comienza a hacer peticiones
   void _startFetchingData() {
     if (isFetching) {
       print('Petició en curs. No es possible iniciar una nova.');
@@ -139,7 +140,7 @@ class MainWidgetState extends State<MainWidget> {
     print('Començant peticions...');
     attemptFetchData();
   }
-
+  // Se detienen las peticiones para evitar duplicados de estas y se vuelven a hacer peticiones 
   Future<void> attemptFetchData() async {
     final String apiUrlWithEndpoint = '$apiUrl$endpoint';
 
@@ -147,7 +148,7 @@ class MainWidgetState extends State<MainWidget> {
         Provider.of<FetchController>(context, listen: false);
     fetchController.startFetching();
 
-//mirem si existeix o esta ben escrit el URL
+    // Se verifica si existe o estan bien escritos los datos que utilizaremos para las peticiones en la configuracion
     if (apiUrl != null &&
         apiUrl!.isNotEmpty &&
         endpoint != null &&
@@ -177,7 +178,7 @@ class MainWidgetState extends State<MainWidget> {
     await Future.delayed(const Duration(seconds: 5));
     attemptFetchData();
   }
-
+  // Funcion para ejecutar las peticiones a una Api
   Future<bool> _fetchData(String apiUrlWithEndpoint) async {
     try {
       print('Obtenint dades de -> $apiUrlWithEndpoint');
@@ -195,7 +196,7 @@ class MainWidgetState extends State<MainWidget> {
         final String url = responseBody['url'];
         final String urlTablet = responseBody['id'];
         final String urlDate = responseBody['creationDate'];
-
+        // En caso de recibir los datos de una firma, se mostraran en un webView
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -236,8 +237,7 @@ class MainWidgetState extends State<MainWidget> {
               urlimatges: widget.urlImatges,
             ),
           MenuData(
-              key: GlobalKey<
-                  _MenuDataState>()), // Muestra un drawer oculto en la pantalla
+              key: GlobalKey<_MenuDataState>()), // Muestra un drawer oculto en la pantalla
         ],
       ),
     );
