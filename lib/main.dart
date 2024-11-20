@@ -143,10 +143,10 @@ class MainWidgetState extends State<MainWidget> {
           isFetching = false; // Finaliza el ciclo si es exitoso
           print('Petició exitosa. Finalitzant intents.');
         } else {
-          print('Resposta no exitosa. Probant de nou en 10 segundos...');
+          print('Resposta no exitosa. Probant de nou en 1 segon...');
         }
       } catch (e) {
-        print('Excepción a la solicitut: $e. Probant de nou en 10 segundos...');
+        print('Excepció a la solicitut: $e. Probant de nou en 10 segon...');
       }
 
       // Siempre espera 10 segundos entre intentos
