@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print, prefer_const_literals_to_create_immutables, prefer_const_constructors, library_private_types_in_public_api, unused_element, empty_constructor_bodies, deprecated_member_use, unused_import, prefer_const_declarations, depend_on_referenced_packages, unused_field, use_key_in_widget_constructors, prefer_final_fields, non_constant_identifier_names, sort_child_properties_last, use_build_context_synchronously, unnecessary_brace_in_string_interps
 import 'package:flutter/material.dart';
 import 'package:flutter_caroussel/configuracio.dart';
+import 'package:flutter_caroussel/controller/fetchController.dart';
 import 'package:flutter_caroussel/errorFounWebView.dart';
 import 'package:flutter_caroussel/imageCarousel.dart';
 import 'package:flutter_caroussel/url_model.dart';
@@ -31,8 +32,11 @@ void main() {
   );
   runApp(
     // Rutas de la aplicacion para moverse a distintos widgets
-    ChangeNotifierProvider(
-      create: (context) => UrlModel(),
+     MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UrlModel()),
+        ChangeNotifierProvider(create: (context) => FetchController()), // Agrega FetchController
+      ],
       child: MaterialApp(
         home: MainWidget(
           username: configuracio.user,
@@ -114,7 +118,7 @@ class MainWidgetState extends State<MainWidget> {
       apiUrl = prefs.getString('urlApi') ?? widget.urlApi;
       bearerToken = prefs.getString('bearer') ?? widget.bearer;
       idTablet = prefs.getString('idTablet') ?? widget.id;
-      endpoint = prefs.getString('endPoint') ?? widget.endpoint;
+      endpoint = prefs.getString('finalEndPoint') ?? widget.endpoint;
 
       // Debugging: Verificar valores cargados
       print('Carregat desde SharedPreferences:');
@@ -132,13 +136,26 @@ class MainWidgetState extends State<MainWidget> {
     }
     isFetching = true;
     print('Començant peticions...');
-    _attemptFetchData();
+    attemptFetchData();
   }
 
-  Future<void> _attemptFetchData() async {
-    while (isFetching) {
+Future<void> attemptFetchData() async {
+
+ final String apiUrlWithEndpoint = '$apiUrl$endpoint';
+
+final fetchController = Provider.of<FetchController>(context, listen: false);
+fetchController.startFetching();
+
+//mirem si existeix o esta ben escrit el URL
+if (apiUrl != null && apiUrl!.isNotEmpty && endpoint != null && endpoint!.isNotEmpty) {
+  
+  while (isFetching) {
+
+    isFetching = fetchController.isFetching;
+
+    print ("IS FETCHING: $isFetching ");
       try {
-        final success = await _fetchData();
+        final success = await _fetchData(apiUrlWithEndpoint);
         if (success) {
           isFetching = false; // Finaliza el ciclo si es exitoso
           print('Petició exitosa. Finalitzant intents.');
@@ -150,22 +167,23 @@ class MainWidgetState extends State<MainWidget> {
       }
 
       // Siempre espera 10 segundos entre intentos
-      if (isFetching) {
-        await Future.delayed(const Duration(seconds: 1));
-      }
-    }
+ 
+      await Future.delayed(const Duration(seconds: 1));
+      
+    } 
+
+  }
     print('Petició finalitzada.');
+    await Future.delayed(const Duration(seconds: 5));
+    attemptFetchData();
+
   }
 
-  void _stopFetchingData() {
-    isFetching = false;
-  }
 
-  Future<bool> _fetchData() async {
-    // Combinar urlApi y endpoint correctamente
-    final String apiUrlWithEndpoint = '$apiUrl$endpoint';
-    print('Obtenint dades de -> $apiUrlWithEndpoint');
+  Future<bool> _fetchData(String apiUrlWithEndpoint) async {
+
     try {
+      print('Obtenint dades de -> $apiUrlWithEndpoint');
       final response = await http.get(
         Uri.parse(apiUrlWithEndpoint),
         headers: {
